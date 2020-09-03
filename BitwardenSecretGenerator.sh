@@ -119,7 +119,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
     export BW_SESSION
     BW_SESSION=$(bitwarden-unlock)
   fi
-  data=$(bw get item "$ITEMNAME")
+  data=$(bw --nointeraction --raw get item "$ITEMNAME")
   local item_id
   item_id=$(jq -r '.id' <<<"$data")
   local secret
@@ -160,7 +160,7 @@ get_attachment() {
   local item_id=$1
   local attachment_id=$2
   attachment_path=$(mktemp)
-  bw --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
+  bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
   cat "$attachment_path"
   rm "$attachment_path"
 }

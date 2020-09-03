@@ -126,14 +126,14 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
       export BW_SESSION
       BW_SESSION=$(bitwarden-unlock)
     fi
-    data=$(bw get item "$ITEMNAME")
+    data=$(bw --nointeraction --raw get item "$ITEMNAME")
     local item_id
     item_id=$(jq -r '.id' <<<"$data")
     local attachment_id
     local attachment_path
     for attachment_id in $(jq -r '(.attachments // [])[].id' <<<"$data"); do
       attachment_path=$(mktemp)
-      bw --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
+      bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
       data=$(
         jq --slurpfile attachment_data <(jq -R . <"$attachment_path") \
         '.attachments[(.attachments | map(.id == "'"$attachment_id"'") | index(true))].data = $attachment_data' \
