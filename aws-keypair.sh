@@ -4,10 +4,11 @@ set -e
 aws_keypair() {
   DOC="Output AWS credentials stored in Bitwarden
 Usage:
-  aws-keypair [--env] ITEMNAME
+  aws-keypair [options] ITEMNAME
 
 Options:
-  --env, -e  Output credentials as exported bash vars instead of json
+  --env, -e            Output credentials as exported bash vars instead of json
+  --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
 "
 # docopt parser below, refresh this parser with `docopt.sh aws-keypair.sh`
 # shellcheck disable=2016,1075
@@ -92,23 +93,27 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:160}
-usage=${DOC:43:37}; digest=e0815; shorts=(-e); longs=(--env); argcounts=(0)
-node_0(){ switch __env 0; }; node_1(){ value ITEMNAME a; }; node_2(){ optional 0
-}; node_3(){ required 2 1; }; node_4(){ required 3; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:43:37}" >&2; exit 1
-}'; unset var___env var_ITEMNAME; parse 4 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__env" "${prefix}ITEMNAME"
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:251}
+usage=${DOC:43:39}; digest=805f4; shorts=('' -e); longs=(--cache-for --env)
+argcounts=(1 0); node_0(){ value __cache_for 0; }; node_1(){ switch __env 1; }
+node_2(){ value ITEMNAME a; }; node_3(){ optional 0 1; }; node_4(){ optional 3
+}; node_5(){ required 4 2; }; node_6(){ required 5; }; cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:43:39}" >&2; exit 1
+}'; unset var___cache_for var___env var_ITEMNAME; parse 6 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__cache_for" \
+"${prefix}__env" "${prefix}ITEMNAME"
+eval "${prefix}"'__cache_for=${var___cache_for:-0}'
 eval "${prefix}"'__env=${var___env:-false}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}__env" "${prefix}ITEMNAME"; done; }
+declare -p "${prefix}__cache_for" "${prefix}__env" "${prefix}ITEMNAME"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh aws-keypair.sh`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE
   fi
-  eval "$(bitwarden-fields --cache-for=900 'AWS API user' AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY || echo return 1)"
+  # shellcheck disable=SC2154
+  eval "$(bitwarden-fields --cache-for="$__cache_for" 'AWS API user' AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY || echo return 1)"
   # shellcheck disable=SC2154
   if $__env; then
     printf 'export AWS_ACCESS_KEY_ID="%s"\nexport AWS_SECRET_ACCESS_KEY="%s"\n' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
