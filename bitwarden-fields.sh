@@ -124,7 +124,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
   if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
     if [[ -z $BW_SESSION ]]; then
       export BW_SESSION
-      BW_SESSION=$(bitwarden-unlock)
+      BW_SESSION=$(bitwarden-unlock --purpose="retrieve \"$ITEMNAME\"")
     fi
     data=$(bw --nointeraction --raw get item "$ITEMNAME")
     local item_id
