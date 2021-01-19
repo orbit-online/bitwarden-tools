@@ -149,7 +149,7 @@ metadata:
       value=$(jq -r '.fields[] | select(.name=="'"$field_name"'").value' <<<"$data")
     fi
     secret_field_name=${secret_field_name//[^-._a-zA-Z0-9]+/_}
-    encoded_value=$(base64 --wrap=0 <<<"$value")
+    encoded_value=$(printf -- "%s" "$value" | base64 --wrap=0)
     printf -- '\n    %s: %s' "$secret_field_name" "$encoded_value"
   done
   )
