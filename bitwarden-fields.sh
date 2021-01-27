@@ -144,7 +144,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
       bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
       data=$(
         jq --slurpfile attachment_data <(jq -R . <"$attachment_path") \
-        '.attachments[(.attachments | map(.id == "'"$attachment_id"'") | index(true))].data = $attachment_data' \
+        '.attachments[(.attachments | map(.id == "'"$attachment_id"'") | index(true))].data = ($attachment_data | join("\n"))' \
         <<<"$data"
         r=$?
         rm "$attachment_path"
@@ -169,11 +169,11 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
     elif [[ $field_name = attachmentid:* ]]; then
       local attachment_id=${field_name/#attachmentid:/}
       variable_name=${variable_name/#attachmentid:/}
-      value=$(jq -r '.attachments[] | select(.id=="'"$attachment_id"'").data[]' <<<"$data")
+      value=$(jq -r '.attachments[] | select(.id=="'"$attachment_id"'").data' <<<"$data")
     elif [[ $field_name = attachment:* ]]; then
       local attachment_name=${field_name/#attachment:/}
       variable_name=${variable_name/#attachment:/}
-      value=$(jq -r '.attachments[] | select(.fileName=="'"$attachment_name"'").data[]' <<<"$data")
+      value=$(jq -r '.attachments[] | select(.fileName=="'"$attachment_name"'").data' <<<"$data")
     else
       value=$(jq -r '.fields[] | select(.name=="'"$field_name"'").value' <<<"$data")
     fi
