@@ -115,13 +115,8 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
   checkdeps bw jq base64
   [[ $1 == *kust-plugin-config* ]] && shift
   eval "$(docopt "$@")"
-  if [[ -z $BW_SESSION ]]; then
-    export BW_SESSION
-    BW_SESSION=$(bitwarden-unlock --purpose="retrieve \"$ITEMNAME\"")
-  fi
-  data=$(bw --nointeraction --raw get item "$ITEMNAME")
-  local item_id
-  item_id=$(jq -r '.id' <<<"$data")
+  local data
+  data="$(bitwarden-fields --cache-for=900 --json "$ITEMNAME" "${FIELD[@]}")"
   local secret
   secret=$(
     set -e
@@ -134,35 +129,18 @@ metadata:
   [[ -n $__namespace ]] && printf -- "  namespace: %s\n" "$__namespace"
   printf -- "data:"
   for field_name in "${FIELD[@]}"; do
-    secret_field_name=$field_name
-    if [[ $field_name = username || $field_name = password ]]; then
-      value=$(jq -r '.login.'"$field_name" <<<"$data")
-    elif [[ $field_name = attachmentid:* ]]; then
-      attachment_id=${field_name/#attachmentid:/}
-      secret_field_name=${secret_field_name/#attachmentid:/}
-      value=$(get_attachment "$item_id" "$attachment_id")
+    if [[ $field_name = attachmentid:* ]]; then
+      field_name=${field_name/#attachmentid:/}
     elif [[ $field_name = attachment:* ]]; then
-      attachment_name=${field_name/#attachment:/}
-      secret_field_name=${secret_field_name/#attachment:/}
-      value=$(get_attachment "$item_id" "$attachment_name")
-    else
-      value=$(jq -r '.fields[] | select(.name=="'"$field_name"'").value' <<<"$data")
+      field_name=${field_name/#attachment:/}
     fi
-    secret_field_name=${secret_field_name//[^-._a-zA-Z0-9]+/_}
+    value=$(jq -r .\""$field_name"\" <<<"$data")
+    secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     encoded_value=$(printf -- "%s" "$value" | base64 --wrap=0)
     printf -- '\n    %s: %s' "$secret_field_name" "$encoded_value"
   done
   )
   printf -- "%s\n" "$secret"
-}
-
-get_attachment() {
-  local item_id=$1
-  local attachment_id=$2
-  attachment_path=$(mktemp)
-  bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
-  cat "$attachment_path"
-  rm "$attachment_path"
 }
 
 checkdeps() {
