@@ -131,7 +131,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
   data="$(bitwarden-fields --cache-for=900 --json "$ITEMNAME" "${field_names[@]}")"
   secret="kind: Secret
 apiVersion: v1
-metadata: {}"
+metadata:"
   # shellcheck disable=SC2154
   secret=$(yq w - metadata.name "$__name" <<<"$secret")
   # shellcheck disable=SC2154
@@ -154,7 +154,8 @@ metadata: {}"
       secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     fi
     field_name=${BASH_REMATCH[6]}
-    value=$(jq -r .\""$field_name"\" <<<"$data")
+    IFS= read -rd '' value < <(jq -r .\""$field_name"\" <<<"$data") || true
+    value=${value%$'\n'}
     # shellcheck disable=SC2154
     if $stringdata; then
       secret=$(yq w - stringData."$secret_field_name" -- "$value" <<<"$secret")
