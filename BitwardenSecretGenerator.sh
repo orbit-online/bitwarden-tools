@@ -10,11 +10,10 @@ Options:
   --name=NAME            Name of the secret
   --namespace=NAMESPACE  Namespace of the secret
 
-Note:
-  To retrieve attachments, prefix their name with \`attachment:\`
-  for attachment IDs use \`attachmentid:\`
-  To encode a value as stringdata prefix the field
-  with \`stringdata:\` before \`attachment:\`
+ITEMNAME format:
+  To retrieve attachments prefix the field with \`attachment:\` or \`attachmentid:\`
+  To rename a field, prefix the the field with \`NAME@\` before \`attachment:\`
+  To encode as stringdata prefix the field with \`stringdata:\` before \`NAME@\`
 "
 # docopt parser below, refresh this parser with `docopt.sh BitwardenSecretGenerator.sh`
 # shellcheck disable=2016,1075,2154
@@ -97,8 +96,8 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:470}
-usage=${DOC:75:87}; digest=3e4d7; shorts=('' ''); longs=(--namespace --name)
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:517}
+usage=${DOC:75:87}; digest=20789; shorts=('' ''); longs=(--namespace --name)
 argcounts=(1 1); node_0(){ value __namespace 0; }; node_1(){ value __name 1; }
 node_2(){ value ITEMNAME a; }; node_3(){ value FIELD a true; }; node_4(){
 optional 0; }; node_5(){ oneormore 3; }; node_6(){ required 4 1 2 5; }
@@ -122,10 +121,11 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
 
   local stringdata secret data field_name secret_field_name field_names=()
   for field_name in "${FIELD[@]}"; do
-    if [[ $field_name = stringdata:* ]]; then
-      field_name=${field_name/#stringdata:/}
+    if ! [[ $field_name =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
+      printf -- $'Unable to parse field name %s\n' "$field_name" >&2
+      return 1
     fi
-    field_names+=("$field_name")
+    field_names+=("${BASH_REMATCH[4]}${BASH_REMATCH[6]}")
   done
 
   data="$(bitwarden-fields --cache-for=900 --json "$ITEMNAME" "${field_names[@]}")"
@@ -139,18 +139,22 @@ metadata: {}"
     secret=$(yq w - metadata.namespace "$__namespace" <<<"$secret")
   fi
   for field_name in "${FIELD[@]}"; do
-    stringdata=false
-    if [[ $field_name = stringdata:* ]]; then
+    if ! [[ $field_name =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
+      printf -- $'Unable to parse field name %s\n' "$field_name" >&2
+      return 1
+    fi
+    if [[ -n ${BASH_REMATCH[1]} ]]; then
       stringdata=true
-      field_name=${field_name/#stringdata:/}
+    else
+      stringdata=false
     fi
-    if [[ $field_name = attachmentid:* ]]; then
-      field_name=${field_name/#attachmentid:/}
-    elif [[ $field_name = attachment:* ]]; then
-      field_name=${field_name/#attachment:/}
+    if [[ -n ${BASH_REMATCH[3]} ]]; then
+      secret_field_name=${BASH_REMATCH[3]}
+    else
+      secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     fi
+    field_name=${BASH_REMATCH[6]}
     value=$(jq -r .\""$field_name"\" <<<"$data")
-    secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     # shellcheck disable=SC2154
     if $stringdata; then
       secret=$(yq w - stringData."$secret_field_name" -- "$value" <<<"$secret")
