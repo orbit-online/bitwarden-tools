@@ -101,7 +101,9 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose"; done; }
   eval "$(docopt "$@")"
 
   local PINENTRY="pinentry"
+  local pinentry_mac="pinentry-mac"
   local pinentry_win="/mnt/c/Program Files (x86)/Gpg4win/bin/pinentry.exe"
+  type "$pinentry_mac" &>/dev/null && PINENTRY=$pinentry_mac
   type "$pinentry_win" &>/dev/null && PINENTRY=$pinentry_win
   checkdeps bw "$PINENTRY"
 
