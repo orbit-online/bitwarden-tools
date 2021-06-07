@@ -119,10 +119,10 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
   [[ $1 == *kust-plugin-config* ]] && shift
   eval "$(docopt "$@")"
 
-  local stringdata secret data field_name secret_field_name field_names=()
-  for field_name in "${FIELD[@]}"; do
-    if ! [[ $field_name =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
-      printf -- $'Unable to parse field name %s\n' "$field_name" >&2
+  local stringdata secret data field_spec field_name secret_field_name field_names=()
+  for field_spec in "${FIELD[@]}"; do
+    if ! [[ $field_spec =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
+      printf -- $'Unable to parse field name %s\n' "$field_spec" >&2
       return 1
     fi
     field_names+=("${BASH_REMATCH[4]}${BASH_REMATCH[6]}")
@@ -138,11 +138,12 @@ metadata:"
   if [[ -n $__namespace ]]; then
     secret=$(yq w - metadata.namespace "$__namespace" <<<"$secret")
   fi
-  for field_name in "${FIELD[@]}"; do
-    if ! [[ $field_name =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
-      printf -- $'Unable to parse field name %s\n' "$field_name" >&2
+  for field_spec in "${FIELD[@]}"; do
+    if ! [[ $field_spec =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
+      printf -- $'Unable to parse field spec %s\n' "$field_spec" >&2
       return 1
     fi
+    field_name=${BASH_REMATCH[6]}
     if [[ -n ${BASH_REMATCH[1]} ]]; then
       stringdata=true
     else
@@ -153,15 +154,14 @@ metadata:"
     else
       secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     fi
-    field_name=${BASH_REMATCH[6]}
     IFS= read -rd '' value < <(jq -r .\""$field_name"\" <<<"$data") || true
     value=${value%$'\n'}
     # shellcheck disable=SC2154
     if $stringdata; then
-      secret=$(yq w - stringData."$secret_field_name" -- "$value" <<<"$secret")
+      secret=$(yq w - stringData.\""$secret_field_name"\" -- "$value" <<<"$secret")
     else
       encoded_value=$(printf -- "%s" "$value" | base64 --wrap=0)
-      secret=$(yq w - data."$secret_field_name" -- "$encoded_value" <<<"$secret")
+      secret=$(yq w - data.\""$secret_field_name"\" -- "$encoded_value" <<<"$secret")
     fi
   done
   printf -- "%s\n" "$secret"
