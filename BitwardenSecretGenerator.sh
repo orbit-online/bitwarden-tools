@@ -133,10 +133,10 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
 apiVersion: v1
 metadata:"
   # shellcheck disable=SC2154
-  secret=$(yq w - metadata.name "$__name" <<<"$secret")
+  secret=$(yq eval ".metadata.name=\"$__name\"" - <<<"$secret")
   # shellcheck disable=SC2154
   if [[ -n $__namespace ]]; then
-    secret=$(yq w - metadata.namespace "$__namespace" <<<"$secret")
+    secret=$(yq eval ".metadata.namespace=\"$__namespace\"" - <<<"$secret")
   fi
   for field_spec in "${FIELD[@]}"; do
     if ! [[ $field_spec =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
@@ -158,10 +158,10 @@ metadata:"
     value=${value%$'\n'}
     # shellcheck disable=SC2154
     if $stringdata; then
-      secret=$(yq w - stringData.\""$secret_field_name"\" -- "$value" <<<"$secret")
+      secret=$(yq eval ".stringData.\"$secret_field_name\"=\"$value\"" - <<<"$secret")
     else
       encoded_value=$(printf -- "%s" "$value" | base64 --wrap=0)
-      secret=$(yq w - data.\""$secret_field_name"\" -- "$encoded_value" <<<"$secret")
+      secret=$(yq eval ".data.\"$secret_field_name\"=\"$encoded_value\"" - <<<"$secret")
     fi
   done
   printf -- "%s\n" "$secret"
