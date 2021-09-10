@@ -119,7 +119,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
 "${prefix}__json" "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh bitwarden-fields.sh`
 
-  checkdeps bw jq jshon
+  checkdeps bw jq
 
   eval "$(docopt "$@")"
 
@@ -180,7 +180,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
     # jq itself attaches a newline to its output, remove that, but keep others
     value=${value%$'\n'}
     if $__json; then
-      json_out=$(jshon -s "$value" -i "$variable_name" <<<"$json_out")
+      json_out=$(jq ".$variable_name=\"$value\"" <<<"$json_out")
     else
       variable_name=${variable_name//[^A-Za-z0-9_]/_}
       variable_name=${variable_name/#[^A-Za-z_]/_}
