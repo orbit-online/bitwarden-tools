@@ -156,7 +156,9 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
     fi
     printf "Error: Communication socket to credentials daemon unreachable after %d tries.\n" "$tries"
   elif $get; then
-    socat -t0 UNIX-CONNECT:"$socketpath" STDOUT
+    # When redirecting socat output it fails with "Bad file descriptor", so we pipe it to `cat` instead
+    set -o pipefail
+    socat -t0 UNIX-CONNECT:"$socketpath" STDOUT | cat
   elif $clear; then
     if [[ -n $ITEMNAME ]]; then
       killsocket "$socketpath"
