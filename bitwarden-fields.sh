@@ -4,14 +4,14 @@ set -e
 bw_fields() {
   DOC="Output Bitwarden item fields as bash variables
 Usage:
-  bitwarden-fields [options] ITEMNAME FIELD...
+  bitwarden-fields [options] ITEMNAME [FIELD...]
 
 Options:
   --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
   --json -j            Output as JSON instead of bash variables
 Note:
   To retrieve attachments, prefix their name with \`attachment:\`
-  for attachment IDs use \`attachmentid:\`
+  For attachment IDs use \`attachmentid:\`
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
 # shellcheck disable=2016,1075,2154
@@ -99,24 +99,24 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:364}
-usage=${DOC:47:53}; digest=c2ce5; shorts=('' -j); longs=(--cache-for --json)
-argcounts=(1 0); node_0(){ value __cache_for 0; }; node_1(){ switch __json 1; }
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:366}
+usage=${DOC:47:55}; digest=df266; shorts=(-j ''); longs=(--json --cache-for)
+argcounts=(0 1); node_0(){ switch __json 0; }; node_1(){ value __cache_for 1; }
 node_2(){ value ITEMNAME a; }; node_3(){ value FIELD a true; }; node_4(){
 optional 0 1; }; node_5(){ optional 4; }; node_6(){ oneormore 3; }; node_7(){
-required 5 2 6; }; node_8(){ required 7; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:47:53}" >&2; exit 1
-}'; unset var___cache_for var___json var_ITEMNAME var_FIELD; parse 8 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__cache_for" \
-"${prefix}__json" "${prefix}ITEMNAME" "${prefix}FIELD"
+optional 6; }; node_8(){ required 5 2 7; }; node_9(){ required 8; }
+cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
+printf "%s\n" "${DOC:47:55}" >&2; exit 1; }'; unset var___json var___cache_for \
+var_ITEMNAME var_FIELD; parse 9 "$@"; local prefix=${DOCOPT_PREFIX:-''}
+unset "${prefix}__json" "${prefix}__cache_for" "${prefix}ITEMNAME" \
+"${prefix}FIELD"; eval "${prefix}"'__json=${var___json:-false}'
 eval "${prefix}"'__cache_for=${var___cache_for:-0}'
-eval "${prefix}"'__json=${var___json:-false}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 if declare -p var_FIELD >/dev/null 2>&1; then
 eval "${prefix}"'FIELD=("${var_FIELD[@]}")'; else eval "${prefix}"'FIELD=()'; fi
 local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
-for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
-"${prefix}__json" "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
+for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
+"${prefix}__cache_for" "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh bitwarden-fields.sh`
 
   checkdeps bw jq

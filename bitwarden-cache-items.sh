@@ -126,7 +126,7 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
         # shellcheck disable=SC2154
         BW_SESSION=$(bitwarden-unlock --purpose="$__purpose")
       fi
-      bitwarden-fields --cache-for="$__cache_for" "$name" any >/dev/null
+      bitwarden-fields --cache-for="$__cache_for" "$name" >/dev/null
     fi
   done
 }
