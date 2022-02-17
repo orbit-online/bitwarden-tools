@@ -137,6 +137,10 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
   local servepid
   local socketpath=${ITEMNAME//[^A-Za-z0-9_]/_}
   socketpath=$sockets_path/${socketpath/#[^A-Za-z_]/_}.sock
+  if [[ ${#socketpath} -gt 108 ]]; then
+    printf -- "Error: Unable to cache '%s', the resulting socket path would be greater than 108 characters\n" "$ITEMNAME" >&2
+    return 1
+  fi
   # shellcheck disable=2154
   if $set; then
     if ! socketavailable "$socketpath"; then
