@@ -142,6 +142,8 @@ $pinentry_script"
         echo "Unlocking Bitwarden failed" >&2
         return 1
       fi
+    elif [[ $out = 'ERR 83886179'* ]]; then
+      continue
     else
       return 1
     fi
