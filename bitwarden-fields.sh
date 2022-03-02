@@ -143,7 +143,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
       attachment_path=$(mktemp)
       bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
       data=$(
-        jq '.attachments[(.attachments | map(.id == "'"$attachment_id"'") | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
+        jq --arg id "$attachment_id" '.attachments[(.attachments | map(.id == $id) | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
         <<<"$data"
         r=$?
         rm "$attachment_path"
@@ -165,22 +165,22 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
     local variable_name=$field_name
     # We read $value weirdly to preserve trailing newlines. Command substitution removes all trailing newlines
     if [[ $field_name = username || $field_name = password ]]; then
-      IFS= read -rd '' value < <(jq -r '.login.'"$field_name" <<<"$data") || true
+      IFS= read -rd '' value < <(jq -r --arg name "$field_name" '.login[$name]' <<<"$data") || true
     elif [[ $field_name = attachmentid:* ]]; then
       local attachment_id=${field_name/#attachmentid:/}
       variable_name=${variable_name/#attachmentid:/}
-      IFS= read -rd '' value < <(jq -r '.attachments[] | select(.id=="'"$attachment_id"'").data' <<<"$data") || true
+      IFS= read -rd '' value < <(jq -r --arg id "$attachment_id" '.attachments[] | select(.id==$id).data' <<<"$data") || true
     elif [[ $field_name = attachment:* ]]; then
       local attachment_name=${field_name/#attachment:/}
       variable_name=${variable_name/#attachment:/}
-      IFS= read -rd '' value < <( jq -r '.attachments[] | select(.fileName=="'"$attachment_name"'").data' <<<"$data" ) || true
+      IFS= read -rd '' value < <( jq -r --arg name "$attachment_name" '.attachments[] | select(.fileName==$name).data' <<<"$data" ) || true
     else
-      IFS= read -rd '' value < <(jq -r '.fields[] | select(.name=="'"$field_name"'").value' <<<"$data") || true
+      IFS= read -rd '' value < <(jq -r --arg name "$field_name" '.fields[] | select(.name==$name).value' <<<"$data") || true
     fi
     # jq itself attaches a newline to its output, remove that, but keep others
     value=${value%$'\n'}
     if $__json; then
-      json_out=$(jq ".\"$variable_name\"=\"$value\"" <<<"$json_out")
+      json_out=$(jq --arg key "$variable_name" --arg value "$value" '.[$key]=$value' <<<"$json_out")
     else
       variable_name=${variable_name//[^A-Za-z0-9_]/_}
       variable_name=${variable_name/#[^A-Za-z_]/_}

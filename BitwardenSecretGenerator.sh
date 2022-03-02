@@ -154,7 +154,7 @@ metadata:"
     else
       secret_field_name=${field_name//[^-._a-zA-Z0-9]+/_}
     fi
-    IFS= read -rd '' value < <(jq -r .\""$field_name"\" <<<"$data") || true
+    IFS= read -rd '' value < <(jq -r --arg name "$field_name" '.[$name]' <<<"$data") || true
     value=${value%$'\n'}
     # shellcheck disable=SC2154
     if $stringdata; then
