@@ -151,6 +151,12 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
     local tries
     for ((tries=0;tries<5;tries++)); do
       if socat UNIX-CONNECT:"$socketpath" STDIN 2>/dev/null; then
+        break
+      fi
+      sleep .1
+    done
+    for ((tries=0;tries<5;tries++)); do
+      if [[ -S "$socketpath" ]]; then
         return 0
       fi
       sleep .1
@@ -158,7 +164,7 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
     if servepid=$(getpid "$socketpath"); then
       start-stop-daemon --pid "$servepid" --stop
     fi
-    printf "Error: Communication socket to credentials daemon unreachable after %d tries.\n" "$tries"
+    printf "Error: Communication socket to credentials daemon unreachable.\n"
   elif $get; then
     # When redirecting socat output it fails with "Bad file descriptor", so we pipe it to `cat` instead
     set -o pipefail
