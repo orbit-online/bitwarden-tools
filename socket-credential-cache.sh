@@ -183,7 +183,7 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
     [[ -z $DATA ]] && return 1
     export SOCKETPATH=$socketpath
     # shellcheck disable=SC2016
-    start-stop-daemon --background --start --exec "$(which socat)" --name "$RANDOM" -- \
+    start-stop-daemon --background --start --exec "$(command -v socat)" --name "$RANDOM" -- \
       UNIX-LISTEN:"$socketpath,unlink-close,fork,umask=177" SYSTEM:'touch -a "$SOCKETPATH"; printf -- "%s" \"\$DATA\"'
     local tries
     for ((tries=0;tries<5;tries++)); do
