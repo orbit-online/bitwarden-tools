@@ -133,6 +133,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
     if [[ -z $BW_SESSION ]]; then
       export BW_SESSION
       BW_SESSION=$(bitwarden-unlock --purpose="retrieve \"$ITEMNAME\"")
+      trap "exec 9>&-; bw lock >/dev/null" EXIT
     fi
     data=$(bw --nointeraction --raw get item "$ITEMNAME")
     local item_id
