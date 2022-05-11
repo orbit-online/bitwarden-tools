@@ -136,7 +136,11 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
       # shellcheck disable=2064
       trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
     fi
-    data=$(bw --nointeraction --raw get item "$ITEMNAME")
+    if ! data=$(bw --nointeraction --raw get item "$ITEMNAME"); then
+      local ret=$?
+      printf "Unable to retrieve '%s'\n" "$ITEMNAME" >&2
+      return $ret
+    fi
     local item_id
     item_id=$(jq -r '.id' <<<"$data")
     local attachment_id
