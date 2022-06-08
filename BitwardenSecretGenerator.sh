@@ -4,11 +4,12 @@ set -e
 main() {
   DOC="BitwardenSecretGenerator - Output a bitwarden entry as a kubernetes secret
 Usage:
-  BitwardenSecretGenerator [--namespace=NAMESPACE] --name=NAME ITEMNAME FIELD...
+  BitwardenSecretGenerator [options] --name=NAME ITEMNAME FIELD...
 
 Options:
   --name=NAME            Name of the secret
   --namespace=NAMESPACE  Namespace of the secret
+  --type=TYPE            The type of secret [default: Opaque]
 
 ITEMNAME format:
   To retrieve attachments prefix the field with \`attachment:\` or \`attachmentid:\`
@@ -96,24 +97,27 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:517}
-usage=${DOC:75:87}; digest=20789; shorts=('' ''); longs=(--namespace --name)
-argcounts=(1 1); node_0(){ value __namespace 0; }; node_1(){ value __name 1; }
-node_2(){ value ITEMNAME a; }; node_3(){ value FIELD a true; }; node_4(){
-optional 0; }; node_5(){ oneormore 3; }; node_6(){ required 4 1 2 5; }
-node_7(){ required 6; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:75:87}" >&2; exit 1
-}'; unset var___namespace var___name var_ITEMNAME var_FIELD; parse 7 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__namespace" \
-"${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:565}
+usage=${DOC:75:73}; digest=bc693; shorts=('' '' '')
+longs=(--namespace --type --name); argcounts=(1 1 1); node_0(){
+value __namespace 0; }; node_1(){ value __type 1; }; node_2(){ value __name 2; }
+node_3(){ value ITEMNAME a; }; node_4(){ value FIELD a true; }; node_5(){
+optional 0 1; }; node_6(){ optional 5; }; node_7(){ oneormore 4; }; node_8(){
+required 6 2 3 7; }; node_9(){ required 8; }; cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:75:73}" >&2; exit 1
+}'; unset var___namespace var___type var___name var_ITEMNAME var_FIELD
+parse 9 "$@"; local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__namespace" \
+"${prefix}__type" "${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"
 eval "${prefix}"'__namespace=${var___namespace:-}'
+eval "${prefix}"'__type=${var___type:-Opaque}'
 eval "${prefix}"'__name=${var___name:-}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 if declare -p var_FIELD >/dev/null 2>&1; then
 eval "${prefix}"'FIELD=("${var_FIELD[@]}")'; else eval "${prefix}"'FIELD=()'; fi
 local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
-"${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
+"${prefix}__type" "${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"; done
+}
 # docopt parser above, complete command for generating this parser is `docopt.sh BitwardenSecretGenerator.sh`
   checkdeps bw jq yq base64
   [[ $1 == *kust-plugin-config* ]] && shift
@@ -134,6 +138,8 @@ apiVersion: v1
 metadata:"
   # shellcheck disable=SC2154
   secret=$(yq eval ".metadata.name=\"$__name\"" - <<<"$secret")
+  # shellcheck disable=SC2154
+  secret=$(yq eval ".type=\"$__type\"" - <<<"$secret")
   # shellcheck disable=SC2154
   if [[ -n $__namespace ]]; then
     secret=$(yq eval ".metadata.namespace=\"$__namespace\"" - <<<"$secret")
