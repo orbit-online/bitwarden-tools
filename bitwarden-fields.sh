@@ -12,6 +12,7 @@ Options:
 Note:
   To retrieve attachments, prefix their name with \`attachment:\`
   For attachment IDs use \`attachmentid:\`
+  To retrieve all fields, omit the FIELD argument entirely
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
 # shellcheck disable=2016,1075,2154
@@ -99,8 +100,8 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:366}
-usage=${DOC:47:55}; digest=df266; shorts=(-j ''); longs=(--json --cache-for)
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:425}
+usage=${DOC:47:55}; digest=04b0b; shorts=(-j ''); longs=(--json --cache-for)
 argcounts=(0 1); node_0(){ switch __json 0; }; node_1(){ value __cache_for 1; }
 node_2(){ value ITEMNAME a; }; node_3(){ value FIELD a true; }; node_4(){
 optional 0 1; }; node_5(){ optional 4; }; node_6(){ oneormore 3; }; node_7(){
@@ -162,15 +163,20 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
       socket-credential-cache --timeout="$__cache_for" set "$cache_name" <<<"$data"
     fi
   fi
-  local field_name
   # shellcheck disable=2154
   if $__json; then
     local json_out='{}'
   fi
+  if [[ ${#FIELD[@]} -eq 0 ]]; then
+    readarray -td $'\n' FIELD < <(
+      jq -r '(if .login != null then .login | keys[] else [][] end), (.attachments[] | ("attachment:" + .fileName)), (.fields[] | .name)' <<<"$data"
+    )
+  fi
+  local field_name
   for field_name in "${FIELD[@]}"; do
     local variable_name=$field_name
     # We read $value weirdly to preserve trailing newlines. Command substitution removes all trailing newlines
-    if [[ $field_name = username || $field_name = password ]]; then
+    if [[ $field_name = username || $field_name = password || $field_name = totp || $field_name = uris || $field_name = passwordRevisionDate ]]; then
       IFS= read -rd '' value < <(jq -r --arg name "$field_name" '.login[$name]' <<<"$data") || true
     elif [[ $field_name = attachmentid:* ]]; then
       local attachment_id=${field_name/#attachmentid:/}
