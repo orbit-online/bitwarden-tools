@@ -169,7 +169,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
   fi
   if [[ ${#FIELD[@]} -eq 0 ]]; then
     readarray -td $'\n' FIELD < <(
-      jq -r '(if .login != null then .login | keys[] else [][] end), (.attachments[] | ("attachment:" + .fileName)), (.fields[] | .name)' <<<"$data"
+      jq -r '((.login // {}) | keys[]), ((.attachments // [])[] | ("attachment:" + .fileName)), ((.fields // [])[] | .name)' <<<"$data"
     )
   fi
   local field_name
