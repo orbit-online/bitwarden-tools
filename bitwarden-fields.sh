@@ -124,10 +124,10 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
 
   eval "$(docopt "$@")"
 
-  local data
-  local cache_name="Bitwarden $ITEMNAME"
-  local LOCK_PATH="${TMP:-/tmp}/${cache_name//[^A-Za-z0-9_]/_}.lock"
-  exec 9<>"$LOCK_PATH"
+  local data lockdir="/var/run/lock/bitwarden-fields" cache_name="Bitwarden $ITEMNAME"
+  [[ -d "$lockdir" ]] || mkdir "$lockdir"
+  local lockpath="$lockdir/${ITEMNAME//[^A-Za-z0-9_]/_}.lock"
+  exec 9<>"$lockpath"
   flock 9
   trap "exec 9>&-" EXIT
   if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
