@@ -184,7 +184,6 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" \
     local DATA
     IFS= read -t 1 -r -d '' DATA < <(socat -t0 UNIX-LISTEN:"$socketsetuppath,unlink-close,umask=177" STDOUT) || true
     [[ -z $DATA ]] && fatal "socket-credential-cache.sh: No data passed to setup socket '%s' or timeout exceeded" "$socketsetuppath"
-    hexdump -C < <(printf '%s' "$DATA")
     local EXTEND_TIMEOUT_USEC=$((${DATA%%$'\n'*} * 1000000))
     systemd-notify "EXTEND_TIMEOUT_USEC=$EXTEND_TIMEOUT_USEC"
     # shellcheck disable=2016,2097,2098
