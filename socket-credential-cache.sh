@@ -4,11 +4,10 @@ set -e
 main() {
   DOC="socket-credential-cache
 Usage:
+  socket-cache-credential set [--timeout=S] ITEMNAME
   socket-cache-credential get ITEMNAME
   socket-cache-credential clear [ITEMNAME]
-  socket-cache-credential set [--timeout=S] ITEMNAME
-  socket-cache-credential serve [--timeout=S] ITEMNAME
-  socket-cache-credential timeout [--timeout=S] ITEMNAME
+  socket-cache-credential serve ITEMNAME
 
 Options:
   --timeout=S  Terminate after S seconds of no activity [default: 900]
@@ -104,143 +103,105 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:358}
-usage=${DOC:24:253}; digest=c218e; shorts=(''); longs=(--timeout); argcounts=(1)
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:287}
+usage=${DOC:24:182}; digest=44969; shorts=(''); longs=(--timeout); argcounts=(1)
 node_0(){ value __timeout 0; }; node_1(){ value ITEMNAME a; }; node_2(){
-_command get; }; node_3(){ _command clear; }; node_4(){ _command set; }
-node_5(){ _command serve; }; node_6(){ _command timeout; }; node_7(){
-required 2 1; }; node_8(){ optional 1; }; node_9(){ required 3 8; }; node_10(){
-optional 0; }; node_11(){ required 4 10 1; }; node_12(){ required 5 10 1; }
-node_13(){ required 6 10 1; }; node_14(){ either 7 9 11 12 13; }; node_15(){
-required 14; }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
-printf "%s\n" "${DOC:24:253}" >&2; exit 1; }'; unset var___timeout \
-var_ITEMNAME var_get var_clear var_set var_serve var_timeout; parse 15 "$@"
+_command set; }; node_3(){ _command get; }; node_4(){ _command clear; }
+node_5(){ _command serve; }; node_6(){ optional 0; }; node_7(){ required 2 6 1
+}; node_8(){ required 3 1; }; node_9(){ optional 1; }; node_10(){ required 4 9
+}; node_11(){ required 5 1; }; node_12(){ either 7 8 10 11; }; node_13(){
+required 12; }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
+printf "%s\n" "${DOC:24:182}" >&2; exit 1; }'; unset var___timeout \
+var_ITEMNAME var_set var_get var_clear var_serve; parse 13 "$@"
 local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__timeout" \
-"${prefix}ITEMNAME" "${prefix}get" "${prefix}clear" "${prefix}set" \
-"${prefix}serve" "${prefix}timeout"
-eval "${prefix}"'__timeout=${var___timeout:-900}'
+"${prefix}ITEMNAME" "${prefix}set" "${prefix}get" "${prefix}clear" \
+"${prefix}serve"; eval "${prefix}"'__timeout=${var___timeout:-900}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
-eval "${prefix}"'get=${var_get:-false}'
+eval "${prefix}"'set=${var_set:-false}'; eval "${prefix}"'get=${var_get:-false}'
 eval "${prefix}"'clear=${var_clear:-false}'
-eval "${prefix}"'set=${var_set:-false}'
-eval "${prefix}"'serve=${var_serve:-false}'
-eval "${prefix}"'timeout=${var_timeout:-false}'; local docopt_i=1
+eval "${prefix}"'serve=${var_serve:-false}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}get" \
-"${prefix}clear" "${prefix}set" "${prefix}serve" "${prefix}timeout"; done; }
+declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" \
+"${prefix}get" "${prefix}clear" "${prefix}serve"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh socket-credential-cache.sh`
   eval "$(docopt "$@")"
-  checkdeps socat start-stop-daemon lsof at
+  checkdeps socat systemctl
   # shellcheck disable=2154
-  local sockets_path=$HOME/.cache/credential-sockets
-  mkdir -p "$sockets_path"
-  local servepid
-  local socketpath=${ITEMNAME//[^A-Za-z0-9_]/_}
-  socketpath=$sockets_path/${socketpath/#[^A-Za-z_]/_}.sock
-  if [[ ${#socketpath} -gt 108 ]]; then
+  local socketspath=$HOME/.cache/credential-sockets unitname socketbasename socketpath socketsetuppath
+
+  socketbasename=${ITEMNAME//[^A-Za-z0-9_]/_}
+  socketbasename=${socketbasename/#[^A-Za-z_]/_}
+  socketsetuppath=$socketspath/${socketbasename/#[^A-Za-z_]/_}_setup.sock
+  socketpath=$socketspath/${socketbasename/#[^A-Za-z_]/_}.sock
+  unitname="socket-credential-cache@$ITEMNAME.service"
+
+  if [[ ${#socketsetuppath} -gt 108 ]]; then
     printf -- "Error: Unable to cache '%s', the resulting socket path would be greater than 108 characters\n" "$ITEMNAME" >&2
     return 1
   fi
+
   # shellcheck disable=2154
   if $set; then
-    if ! socketavailable "$socketpath"; then
-      printf -- "Error: %s already exists\n" "$socketpath" >&2
-      return 1
+    mkdir -p "$socketspath"
+    if systemctl --user is-active --quiet "$unitname"; then
+      fatal "socket-credential-cache.sh: '%s' is already cached\n" "$ITEMNAME"
     fi
-    start-stop-daemon --background --exec "$0" --start -- serve --timeout="$__timeout" "$ITEMNAME"
-    local tries
-    for ((tries=0;tries<5;tries++)); do
-      if socat UNIX-CONNECT:"$socketpath" STDIN 2>/dev/null; then
-        break
+    if ! systemctl --user start --quiet "$unitname"; then
+      if ! systemctl --user list-unit-files --plain --no-legend | grep -q socket-credential-cache@.service; then
+        fatal "socket-credential-cache.sh: Failed to start unit '%s'\nsocket-credential-cache@.service is not installed (run \`homeshick link')" "$unitname"
+      else
+        fatal "socket-credential-cache.sh: Failed to start unit '%s'" "$unitname"
       fi
-      sleep .1
-    done
-    for ((tries=0;tries<5;tries++)); do
-      if [[ -S "$socketpath" ]]; then
-        return 0
-      fi
-      sleep .1
-    done
-    if servepid=$(getpid "$socketpath"); then
-      start-stop-daemon --pid "$servepid" --stop
     fi
-    printf "Error: Communication socket to credentials daemon unreachable.\n"
+    if ! waitforsocket "$socketsetuppath"; then
+      systemctl --user stop --quiet "$unitname"
+      fatal "socket-credential-cache.sh: Timed out waiting for '%s' to become ready" "$socketsetuppath"
+    fi
+    if ! (printf "%d\n" "$__timeout"; cat) | socat UNIX-CONNECT:"$socketsetuppath" STDIN 2>/dev/null; then
+      fatal "socket-credential-cache.sh: Failed to connect to '%s'" "$socketsetuppath"
+    fi
+    if ! waitforsocket "$socketpath"; then
+      systemctl --user stop --quiet "$unitname"
+      fatal "socket-credential-cache.sh: Timed out waiting for '%s' to become ready" "$socketpath"
+    fi
+
   elif $get; then
     # When redirecting socat output it fails with "Bad file descriptor", so we pipe it to `cat` instead
     set -o pipefail
     socat -t0 UNIX-CONNECT:"$socketpath" STDOUT | cat
+
   elif $clear; then
     if [[ -n $ITEMNAME ]]; then
-      killsocket "$socketpath"
+      systemctl --user stop --quiet "$unitname"
     else
-      for socketpath in "$sockets_path"/*.sock; do
-        killsocket "$socketpath"
+      for unitname in $(systemctl --user list-units 'socket-credential-cache@*.service' --plain --no-legend --state=active | cut -d' ' -f1); do
+        systemctl --user stop --quiet "$unitname"
       done
     fi
+
   elif $serve; then
-    export DATA
-    DATA=$(socat -t0 UNIX-LISTEN:"$socketpath,unlink-close,umask=177" STDOUT)
-    [[ -z $DATA ]] && return 1
-    export SOCKETPATH=$socketpath
-    # shellcheck disable=SC2016
-    start-stop-daemon --background --start --exec "$(command -v socat)" --name "$RANDOM" -- \
-      UNIX-LISTEN:"$socketpath,unlink-close,fork,umask=177" SYSTEM:'touch -a "$SOCKETPATH"; printf -- "%s" \"\$DATA\"'
-    local tries
-    for ((tries=0;tries<5;tries++)); do
-      if [[ -e "$socketpath" ]]; then
-        exec "$0" timeout --timeout "$__timeout" "$ITEMNAME"
-      fi
-      sleep .1
-    done
-  elif $timeout; then
-    local timeout_in
-    while true; do
-      timeout_in=$((__timeout - ($(date +%s) - $(stat -L --format %X "$socketpath"))))
-      if [[ $timeout_in -gt 0 ]]; then
-        if [[ $timeout_in -lt 60 ]]; then
-          sleep $timeout_in
-          continue
-        else
-          local timeout_cmd="\"$0\" timeout --timeout \"$__timeout\" \"$ITEMNAME\""
-          at "NOW +$((timeout_in / 60)) minutes" <<<"$timeout_cmd" 2>/dev/null
-          return 0
-        fi
-      else
-        exec "$0" clear "$ITEMNAME"
-      fi
-    done
+    systemd-notify --ready
+    local DATA
+    IFS= read -t 1 -r -d '' DATA < <(socat -t0 UNIX-LISTEN:"$socketsetuppath,unlink-close,umask=177" STDOUT) || true
+    [[ -z $DATA ]] && fatal "socket-credential-cache.sh: No data passed to setup socket '%s' or timeout exceeded" "$socketsetuppath"
+    hexdump -C < <(printf '%s' "$DATA")
+    local EXTEND_TIMEOUT_USEC=$((${DATA%%$'\n'*} * 1000000))
+    systemd-notify "EXTEND_TIMEOUT_USEC=$EXTEND_TIMEOUT_USEC"
+    # shellcheck disable=2016,2097,2098
+    socketpath=$socketpath EXTEND_TIMEOUT_USEC=$EXTEND_TIMEOUT_USEC SECRET=${DATA#*$'\n'} exec \
+      socat UNIX-LISTEN:"$socketpath,unlink-close,fork,umask=177" SYSTEM:'systemd-notify "EXTEND_TIMEOUT_USEC=$EXTEND_TIMEOUT_USEC"; printf -- "%s" \"\$SECRET\"'
   fi
 }
 
-getpid() {
-  local socketpath=$1
-  lsof +E -taU -- "$socketpath" 2>/dev/null
-}
-
-killsocket() {
-  local socketpath=$1
-  if [[ -e $socketpath ]]; then
-    local servepid
-    if servepid=$(getpid "$socketpath"); then
-      start-stop-daemon --pid "$servepid" --stop
-    else
-      rm "$socketpath"
-    fi
-  fi
-}
-
-socketavailable() {
-  local socketpath=$1
-  if [[ -e $socketpath ]]; then
-    if ! getpid "$socketpath" >/dev/null; then
-      rm "$socketpath"
+waitforsocket() {
+  local tries socketpath=$1
+  for ((tries=0;tries<5;tries++)); do
+    if [[ -S "$socketpath" ]]; then
       return 0
-    else
-      return 1
     fi
-  else
-    return 0
-  fi
+    sleep .1
+  done
+  return 1
 }
 
 checkdeps() {
@@ -255,6 +216,13 @@ checkdeps() {
     fi
   done
   return $ret
+}
+
+fatal() {
+  # shellcheck disable=2059
+  printf -- "$@"
+  printf -- "\n"
+  exit 1
 }
 
 main "$@"
