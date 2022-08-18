@@ -145,9 +145,6 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" \
     mkdir -p "$socketspath"
     if systemctl --user is-active --quiet "$unitname"; then
       fatal "socket-credential-cache.sh: '%s' is already cached\n" "$ITEMNAME"
-    else
-      # clean up socketpath after e.g. a system crash
-      rm -f "$socketpath"
     fi
     if ! systemctl --user start --quiet "$unitname"; then
       if ! systemctl --user list-unit-files --plain --no-legend | grep -q socket-credential-cache@.service; then
@@ -183,6 +180,8 @@ declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" \
     fi
 
   elif $serve; then
+    # clean up socketpath after e.g. a system crash
+    rm -f "$socketsetuppath" "$socketpath"
     systemd-notify --ready
     local DATA
     IFS= read -t 1 -r -d '' DATA < <(socat -t0 UNIX-LISTEN:"$socketsetuppath,unlink-close,umask=177" STDOUT) || true
