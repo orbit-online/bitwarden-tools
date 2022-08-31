@@ -9,6 +9,7 @@ Usage:
 Options:
   --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
   --json -j            Output as JSON instead of bash variables
+  --debug              Turn on bash -x
 Note:
   To retrieve attachments, prefix their name with \`attachment:\`
   For attachment IDs use \`attachmentid:\`
@@ -100,29 +101,38 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:425}
-usage=${DOC:47:55}; digest=04b0b; shorts=(-j ''); longs=(--json --cache-for)
-argcounts=(0 1); node_0(){ switch __json 0; }; node_1(){ value __cache_for 1; }
-node_2(){ value ITEMNAME a; }; node_3(){ value FIELD a true; }; node_4(){
-optional 0 1; }; node_5(){ optional 4; }; node_6(){ oneormore 3; }; node_7(){
-optional 6; }; node_8(){ required 5 2 7; }; node_9(){ required 8; }
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:464}
+usage=${DOC:47:55}; digest=c886f; shorts=('' '' -j)
+longs=(--cache-for --debug --json); argcounts=(1 0 0); node_0(){
+value __cache_for 0; }; node_1(){ switch __debug 1; }; node_2(){ switch __json 2
+}; node_3(){ value ITEMNAME a; }; node_4(){ value FIELD a true; }; node_5(){
+optional 0 1 2; }; node_6(){ optional 5; }; node_7(){ oneormore 4; }; node_8(){
+optional 7; }; node_9(){ required 6 3 8; }; node_10(){ required 9; }
 cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
-printf "%s\n" "${DOC:47:55}" >&2; exit 1; }'; unset var___json var___cache_for \
-var_ITEMNAME var_FIELD; parse 9 "$@"; local prefix=${DOCOPT_PREFIX:-''}
-unset "${prefix}__json" "${prefix}__cache_for" "${prefix}ITEMNAME" \
-"${prefix}FIELD"; eval "${prefix}"'__json=${var___json:-false}'
+printf "%s\n" "${DOC:47:55}" >&2; exit 1; }'; unset var___cache_for \
+var___debug var___json var_ITEMNAME var_FIELD; parse 10 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__cache_for" \
+"${prefix}__debug" "${prefix}__json" "${prefix}ITEMNAME" "${prefix}FIELD"
 eval "${prefix}"'__cache_for=${var___cache_for:-0}'
+eval "${prefix}"'__debug=${var___debug:-false}'
+eval "${prefix}"'__json=${var___json:-false}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 if declare -p var_FIELD >/dev/null 2>&1; then
 eval "${prefix}"'FIELD=("${var_FIELD[@]}")'; else eval "${prefix}"'FIELD=()'; fi
 local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
-for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
-"${prefix}__cache_for" "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
+for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__cache_for" \
+"${prefix}__debug" "${prefix}__json" "${prefix}ITEMNAME" "${prefix}FIELD"; done
+}
 # docopt parser above, complete command for generating this parser is `docopt.sh bitwarden-fields.sh`
 
   checkdeps bw jq
 
   eval "$(docopt "$@")"
+
+  # shellcheck disable=2154
+  if $__debug; then
+    set -x
+  fi
 
   local data lockdir="/var/run/lock/bitwarden-fields" cache_name="Bitwarden $ITEMNAME"
   [[ -d "$lockdir" ]] || mkdir "$lockdir"

@@ -4,13 +4,14 @@ set -e
 main() {
   DOC="socket-credential-cache
 Usage:
-  socket-cache-credential set [--timeout=S] ITEMNAME
-  socket-cache-credential get ITEMNAME
-  socket-cache-credential clear [ITEMNAME]
-  socket-cache-credential serve ITEMNAME
+  socket-cache-credential [options] set [--timeout=S] ITEMNAME
+  socket-cache-credential [options] get ITEMNAME
+  socket-cache-credential [options] clear [ITEMNAME]
+  socket-cache-credential [options] serve ITEMNAME
 
 Options:
   --timeout=S  Terminate after S seconds of no activity [default: 900]
+  --debug      Turn on bash -x
 "
 # docopt parser below, refresh this parser with `docopt.sh socket-credential-cache.sh`
 # shellcheck disable=2016,1075
@@ -94,6 +95,11 @@ if [[ ${parsed_values[$l]} != "$name" ]]; then return 1; fi
 left=("${left[@]:0:$i}" "${left[@]:((i+1))}")
 [[ $testdepth -gt 0 ]] && return 0; if [[ $3 = true ]]; then
 eval "((var_$1++)) || true"; else eval "var_$1=true"; fi; return 0; fi; done
+return 1; }; switch() { local i; for i in "${!left[@]}"; do local l=${left[$i]}
+if [[ ${parsed_params[$l]} = "$2" ]]; then
+left=("${left[@]:0:$i}" "${left[@]:((i+1))}")
+[[ $testdepth -gt 0 ]] && return 0; if [[ $3 = true ]]; then
+eval "((var_$1++))" || true; else eval "var_$1=true"; fi; return 0; fi; done
 return 1; }; value() { local i; for i in "${!left[@]}"; do local l=${left[$i]}
 if [[ ${parsed_params[$l]} = "$2" ]]; then
 left=("${left[@]:0:$i}" "${left[@]:((i+1))}")
@@ -103,28 +109,37 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:287}
-usage=${DOC:24:182}; digest=44969; shorts=(''); longs=(--timeout); argcounts=(1)
-node_0(){ value __timeout 0; }; node_1(){ value ITEMNAME a; }; node_2(){
-_command set; }; node_3(){ _command get; }; node_4(){ _command clear; }
-node_5(){ _command serve; }; node_6(){ optional 0; }; node_7(){ required 2 6 1
-}; node_8(){ required 3 1; }; node_9(){ optional 1; }; node_10(){ required 4 9
-}; node_11(){ required 5 1; }; node_12(){ either 7 8 10 11; }; node_13(){
-required 12; }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
-printf "%s\n" "${DOC:24:182}" >&2; exit 1; }'; unset var___timeout \
-var_ITEMNAME var_set var_get var_clear var_serve; parse 13 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__timeout" \
-"${prefix}ITEMNAME" "${prefix}set" "${prefix}get" "${prefix}clear" \
-"${prefix}serve"; eval "${prefix}"'__timeout=${var___timeout:-900}'
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:358}
+usage=${DOC:24:222}; digest=ad091; shorts=('' ''); longs=(--debug --timeout)
+argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __timeout 1; }
+node_2(){ value ITEMNAME a; }; node_3(){ _command set; }; node_4(){ _command get
+}; node_5(){ _command clear; }; node_6(){ _command serve; }; node_7(){
+optional 0; }; node_8(){ optional 7; }; node_9(){ optional 1; }; node_10(){
+required 8 3 9 2; }; node_11(){ required 8 4 2; }; node_12(){ optional 2; }
+node_13(){ required 8 5 12; }; node_14(){ required 8 6 2; }; node_15(){
+either 10 11 13 14; }; node_16(){ required 15; }; cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:24:222}" >&2; exit 1
+}'; unset var___debug var___timeout var_ITEMNAME var_set var_get var_clear \
+var_serve; parse 16 "$@"; local prefix=${DOCOPT_PREFIX:-''}
+unset "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
+"${prefix}set" "${prefix}get" "${prefix}clear" "${prefix}serve"
+eval "${prefix}"'__debug=${var___debug:-false}'
+eval "${prefix}"'__timeout=${var___timeout:-900}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 eval "${prefix}"'set=${var_set:-false}'; eval "${prefix}"'get=${var_get:-false}'
 eval "${prefix}"'clear=${var_clear:-false}'
 eval "${prefix}"'serve=${var_serve:-false}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" \
-"${prefix}get" "${prefix}clear" "${prefix}serve"; done; }
+declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
+"${prefix}set" "${prefix}get" "${prefix}clear" "${prefix}serve"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh socket-credential-cache.sh`
   eval "$(docopt "$@")"
+
+  # shellcheck disable=2154
+  if $__debug; then
+    set -x
+  fi
+
   checkdeps socat systemctl
   # shellcheck disable=2154
   local socketspath=$HOME/.cache/credential-sockets unitname socketbasename socketpath socketsetuppath
