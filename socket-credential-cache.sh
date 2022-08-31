@@ -148,7 +148,7 @@ declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
   socketbasename=${socketbasename/#[^A-Za-z_]/_}
   socketsetuppath=$socketspath/${socketbasename/#[^A-Za-z_]/_}_setup.sock
   socketpath=$socketspath/${socketbasename/#[^A-Za-z_]/_}.sock
-  unitname="socket-credential-cache@$ITEMNAME.service"
+  unitname="socket-credential-cache@${ITEMNAME//[@*]/_}.service"
 
   if [[ ${#socketsetuppath} -gt 108 ]]; then
     printf -- "Error: Unable to cache '%s', the resulting socket path would be greater than 108 characters\n" "$ITEMNAME" >&2
