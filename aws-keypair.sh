@@ -112,9 +112,9 @@ declare -p "${prefix}__cache_for" "${prefix}__env" "${prefix}ITEMNAME"; done; }
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE
   fi
-  # shellcheck disable=SC2154
+  # shellcheck disable=2154
   eval "$(bitwarden-fields --cache-for="$__cache_for" 'AWS API user' AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY || echo return 1)"
-  # shellcheck disable=SC2154
+  # shellcheck disable=2154
   if $__env; then
     printf 'export AWS_ACCESS_KEY_ID="%s"\nexport AWS_SECRET_ACCESS_KEY="%s"\n' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
   else

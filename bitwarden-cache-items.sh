@@ -119,11 +119,11 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
   local cache_name
   for name in "${ITEMNAME[@]}"; do
     cache_name="Bitwarden $name"
-    # shellcheck disable=SC2154
+    # shellcheck disable=2154
     if ! socket-credential-cache get "$cache_name" >/dev/null 2>&1; then
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
-        # shellcheck disable=SC2154
+        # shellcheck disable=2154
         BW_SESSION=$(bitwarden-unlock --purpose="$__purpose")
         trap "bw lock >/dev/null" EXIT
       fi

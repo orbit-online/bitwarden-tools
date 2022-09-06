@@ -114,7 +114,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose"; done; }
   trap "exec 9>&-" EXIT
 
   PURPOSE="Enter your Bitwarden Master Password"
-  # shellcheck disable=SC2154
+  # shellcheck disable=2154
   if [[ -n $__purpose ]]; then
     PURPOSE="$PURPOSE to $__purpose"
   fi
