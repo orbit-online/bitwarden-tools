@@ -6,6 +6,7 @@ main() {
 Usage:
   socket-cache-credential [options] set [--timeout=S] ITEMNAME
   socket-cache-credential [options] get ITEMNAME
+  socket-cache-credential [options] list
   socket-cache-credential [options] clear [ITEMNAME]
   socket-cache-credential [options] serve ITEMNAME
 
@@ -109,29 +110,32 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:358}
-usage=${DOC:24:222}; digest=ad091; shorts=('' ''); longs=(--debug --timeout)
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:399}
+usage=${DOC:24:263}; digest=97de8; shorts=('' ''); longs=(--debug --timeout)
 argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __timeout 1; }
 node_2(){ value ITEMNAME a; }; node_3(){ _command set; }; node_4(){ _command get
-}; node_5(){ _command clear; }; node_6(){ _command serve; }; node_7(){
-optional 0; }; node_8(){ optional 7; }; node_9(){ optional 1; }; node_10(){
-required 8 3 9 2; }; node_11(){ required 8 4 2; }; node_12(){ optional 2; }
-node_13(){ required 8 5 12; }; node_14(){ required 8 6 2; }; node_15(){
-either 10 11 13 14; }; node_16(){ required 15; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:24:222}" >&2; exit 1
-}'; unset var___debug var___timeout var_ITEMNAME var_set var_get var_clear \
-var_serve; parse 16 "$@"; local prefix=${DOCOPT_PREFIX:-''}
-unset "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
-"${prefix}set" "${prefix}get" "${prefix}clear" "${prefix}serve"
+}; node_5(){ _command list; }; node_6(){ _command clear; }; node_7(){
+_command serve; }; node_8(){ optional 0; }; node_9(){ optional 8; }; node_10(){
+optional 1; }; node_11(){ required 9 3 10 2; }; node_12(){ required 9 4 2; }
+node_13(){ required 9 5; }; node_14(){ optional 2; }; node_15(){ required 9 6 14
+}; node_16(){ required 9 7 2; }; node_17(){ either 11 12 13 15 16; }; node_18(){
+required 17; }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
+printf "%s\n" "${DOC:24:263}" >&2; exit 1; }'; unset var___debug var___timeout \
+var_ITEMNAME var_set var_get var_list var_clear var_serve; parse 18 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__debug" \
+"${prefix}__timeout" "${prefix}ITEMNAME" "${prefix}set" "${prefix}get" \
+"${prefix}list" "${prefix}clear" "${prefix}serve"
 eval "${prefix}"'__debug=${var___debug:-false}'
 eval "${prefix}"'__timeout=${var___timeout:-900}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 eval "${prefix}"'set=${var_set:-false}'; eval "${prefix}"'get=${var_get:-false}'
+eval "${prefix}"'list=${var_list:-false}'
 eval "${prefix}"'clear=${var_clear:-false}'
 eval "${prefix}"'serve=${var_serve:-false}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
-"${prefix}set" "${prefix}get" "${prefix}clear" "${prefix}serve"; done; }
+"${prefix}set" "${prefix}get" "${prefix}list" "${prefix}clear" "${prefix}serve"
+done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh socket-credential-cache.sh`
   eval "$(docopt "$@")"
 
@@ -184,6 +188,14 @@ declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
     # When redirecting socat output it fails with "Bad file descriptor", so we pipe it to `cat` instead
     set -o pipefail
     socat -t0 UNIX-CONNECT:"$socketpath" STDOUT | cat
+
+  elif $list; then
+    for unitname in $(systemctl --user list-units 'socket-credential-cache@*.service' --plain --no-legend --state=active | cut -d' ' -f1); do
+      unitname=${unitname%\.service*}
+      unitname=${unitname#socket-credential-cache\@}
+      unitname=${unitname//'\x20'/ }
+      printf "%s\n" "$unitname"
+    done
 
   elif $clear; then
     if [[ -n $ITEMNAME ]]; then
