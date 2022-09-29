@@ -152,7 +152,9 @@ done; }
   socketbasename=${socketbasename/#[^A-Za-z_]/_}
   socketsetuppath=$socketspath/${socketbasename/#[^A-Za-z_]/_}_setup.sock
   socketpath=$socketspath/${socketbasename/#[^A-Za-z_]/_}.sock
-  unitname="socket-credential-cache@${ITEMNAME//[@*]/_}.service"
+  unitname=${ITEMNAME//'@'/'\x64'}
+  unitname=${ITEMNAME//'*'/_}
+  unitname="socket-credential-cache@$unitname.service"
 
   if [[ ${#socketsetuppath} -gt 108 ]]; then
     printf -- "Error: Unable to cache '%s', the resulting socket path would be greater than 108 characters\n" "$ITEMNAME" >&2
@@ -193,8 +195,9 @@ done; }
     for unitname in $(systemctl --user list-units 'socket-credential-cache@*.service' --plain --no-legend --state=active | cut -d' ' -f1); do
       unitname=${unitname%\.service*}
       unitname=${unitname#socket-credential-cache\@}
-      unitname=${unitname//'\x20'/ }
-      printf "%s\n" "$unitname"
+      # The var in printf is on purpose, it's an easy way to unescape all the \x escapes
+      # shellcheck disable=2059
+      printf "$unitname\n"
     done
 
   elif $clear; then
