@@ -126,7 +126,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
   local stringdata secret data field_spec field_name secret_field_name field_names=()
   for field_spec in "${FIELD[@]}"; do
     if ! [[ $field_spec =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
-      printf -- $'Unable to parse field name %s\n' "$field_spec" >&2
+      printf -- 'BitwardenSecretGenerator.sh: Unable to parse field name %s\n' "$field_spec" >&2
       return 1
     fi
     field_names+=("${BASH_REMATCH[4]}${BASH_REMATCH[6]}")
@@ -146,7 +146,7 @@ metadata:"
   fi
   for field_spec in "${FIELD[@]}"; do
     if ! [[ $field_spec =~ ^(stringdata:)?(([^@]+)@)?(attachment(id)?:)?(.*)$ ]]; then
-      printf -- $'Unable to parse field spec %s\n' "$field_spec" >&2
+      printf -- 'BitwardenSecretGenerator.sh: Unable to parse field spec %s\n' "$field_spec" >&2
       return 1
     fi
     field_name=${BASH_REMATCH[6]}

@@ -157,15 +157,14 @@ done; }
   unitname="socket-credential-cache@$unitname.service"
 
   if [[ ${#socketsetuppath} -gt 108 ]]; then
-    printf -- "Error: Unable to cache '%s', the resulting socket path would be greater than 108 characters\n" "$ITEMNAME" >&2
-    return 1
+    fatal "socket-credential-cache.sh: Unable to cache '%s', the resulting socket path would be greater than 108 characters" "$ITEMNAME"
   fi
 
   # shellcheck disable=2154
   if $set; then
     mkdir -p "$socketspath"
     if systemctl --user is-active --quiet "$unitname"; then
-      fatal "socket-credential-cache.sh: '%s' is already cached\n" "$ITEMNAME"
+      fatal "socket-credential-cache.sh: '%s' is already cached" "$ITEMNAME"
     fi
     if ! systemctl --user start --quiet "$unitname"; then
       if ! systemctl --user list-unit-files --plain --no-legend | grep -q socket-credential-cache@.service; then
@@ -242,8 +241,7 @@ checkdeps() {
   local ret=0
   for dep in "${deps[@]}"; do
     if ! out=$(type "$dep" 2>&1); then
-      printf -- "Dependency %s not found:\n%s\n" "$dep" "$out"
-      ret=1
+      fatal "socket-credential-cache.sh: Dependency %s not found:\n%s" "$dep" "$out"
     fi
   done
   return $ret

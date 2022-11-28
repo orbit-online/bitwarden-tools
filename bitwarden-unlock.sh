@@ -139,7 +139,7 @@ $pinentry_script"
         printf "%s\n" "$session_key"
         return 0
       elif [[ $tries -ge 3 ]]; then
-        echo "Unlocking Bitwarden failed" >&2
+        printf "bitwarden-unlock.sh: Unlocking Bitwarden failed\n" >&2
         return 1
       fi
     elif [[ $out = *'ERR 83886179'* ]]; then
