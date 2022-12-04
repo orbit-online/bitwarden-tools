@@ -9,6 +9,7 @@ Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
+  --debug               Turn on bash -x
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-unlock.sh`
 # shellcheck disable=2016,1075
@@ -78,8 +79,13 @@ if ! "node_$node_idx"; then left=("${initial_left[@]}"); ((testdepth--)) || true
 return 1; fi; done; if [[ $((--testdepth)) -eq 0 ]]; then
 left=("${initial_left[@]}"); for node_idx in "$@"; do "node_$node_idx"; done; fi
 return 0; }; optional() { local node_idx; for node_idx in "$@"; do
-"node_$node_idx"; done; return 0; }; value() { local i
+"node_$node_idx"; done; return 0; }; switch() { local i
 for i in "${!left[@]}"; do local l=${left[$i]}
+if [[ ${parsed_params[$l]} = "$2" ]]; then
+left=("${left[@]:0:$i}" "${left[@]:((i+1))}")
+[[ $testdepth -gt 0 ]] && return 0; if [[ $3 = true ]]; then
+eval "((var_$1++))" || true; else eval "var_$1=true"; fi; return 0; fi; done
+return 1; }; value() { local i; for i in "${!left[@]}"; do local l=${left[$i]}
 if [[ ${parsed_params[$l]} = "$2" ]]; then
 left=("${left[@]:0:$i}" "${left[@]:((i+1))}")
 [[ $testdepth -gt 0 ]] && return 0; local value
@@ -88,17 +94,25 @@ eval "var_$1+=($value)"; else eval "var_$1=$value"; fi; return 0; fi; done
 return 1; }; stdout() { printf -- "cat <<'EOM'\n%s\nEOM\n" "$1"; }; stderr() {
 printf -- "cat <<'EOM' >&2\n%s\nEOM\n" "$1"; }; error() {
 [[ -n $1 ]] && stderr "$1"; stderr "$usage"; _return 1; }; _return() {
-printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:313}
-usage=${DOC:77:35}; digest=270de; shorts=(-p); longs=(--purpose); argcounts=(1)
-node_0(){ value __purpose 0; }; node_1(){ optional 0; }; node_2(){ optional 1; }
-node_3(){ required 2; }; node_4(){ required 3; }; cat <<<' docopt_exit() {
+printf -- "exit %d\n" "$1"; exit "$1"; }; set -e; trimmed_doc=${DOC:0:353}
+usage=${DOC:77:35}; digest=4c641; shorts=('' -p); longs=(--debug --purpose)
+argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __purpose 1; }
+node_2(){ optional 0 1; }; node_3(){ optional 2; }; node_4(){ required 3; }
+node_5(){ required 4; }; cat <<<' docopt_exit() {
 [[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:77:35}" >&2; exit 1
-}'; unset var___purpose; parse 4 "$@"; local prefix=${DOCOPT_PREFIX:-''}
-unset "${prefix}__purpose"; eval "${prefix}"'__purpose=${var___purpose:-}'
-local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
-for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose"; done; }
+}'; unset var___debug var___purpose; parse 5 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__debug" "${prefix}__purpose"
+eval "${prefix}"'__debug=${var___debug:-false}'
+eval "${prefix}"'__purpose=${var___purpose:-}'; local docopt_i=1
+[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
+declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh bitwarden-unlock.sh`
   eval "$(docopt "$@")"
+
+  # shellcheck disable=2154
+  if $__debug; then
+    set -x
+  fi
 
   local PINENTRY="pinentry"
   local pinentry_mac="pinentry-mac"
@@ -118,22 +132,23 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose"; done; }
   if [[ -n $__purpose ]]; then
     PURPOSE="$PURPOSE to $__purpose"
   fi
-  local pinentry_script="SETPROMPT Unlock Bitwarden
+  local pinentry_script pinentry_script_base="SETPROMPT Unlock Bitwarden
 SETDESC $PURPOSE
 SETOK Unlock
 SETCANCEL Abort
 GETPIN
 "
+  pinentry_script=$pinentry_script_base
   local tries=0
   while true; do
     ((tries++)) || true
     local out
-    out=$("$PINENTRY" <<<"$pinentry_script")
+    out=$("$PINENTRY" <<<"$pinentry_script" || true)
     if [[ $out = *$'\nOK' ]]; then
       local pass=${out%%$'\nOK'}
       pass=${pass##*$'\nD '}
       pinentry_script="SETERROR Invalid password
-$pinentry_script"
+$pinentry_script_base"
       local session_key
       if session_key=$(bw unlock --raw <<<"$pass" 2>/dev/null); then
         printf "%s\n" "$session_key"
