@@ -12,22 +12,22 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh aws-keypair.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$PKGROOT/docopt-lib-1.0.0.sh" '1.0.0' || { ret=$?
+docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:251}
-usage=${DOC:43:39}; digest=805f4; shorts=('' -e); longs=(--cache-for --env)
-argcounts=(1 0); node_0(){ value __cache_for 0; }; node_1(){ switch __env 1; }
+usage=${DOC:43:39}; digest=805f4; shorts=(-e ''); longs=(--env --cache-for)
+argcounts=(0 1); node_0(){ switch __env 0; }; node_1(){ value __cache_for 1; }
 node_2(){ value ITEMNAME a; }; node_3(){ optional 0 1; }; node_4(){ optional 3
 }; node_5(){ required 4 2; }; node_6(){ required 5; }; cat <<<' docopt_exit() {
 [[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:43:39}" >&2; exit 1
-}'; unset var___cache_for var___env var_ITEMNAME; parse 6 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__cache_for" \
-"${prefix}__env" "${prefix}ITEMNAME"
-eval "${prefix}"'__cache_for=${var___cache_for:-0}'
+}'; unset var___env var___cache_for var_ITEMNAME; parse 6 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__env" \
+"${prefix}__cache_for" "${prefix}ITEMNAME"
 eval "${prefix}"'__env=${var___env:-false}'
+eval "${prefix}"'__cache_for=${var___cache_for:-0}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}__cache_for" "${prefix}__env" "${prefix}ITEMNAME"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/docopt-lib-1.0.0.sh"' aws-keypair.sh`
+declare -p "${prefix}__env" "${prefix}__cache_for" "${prefix}ITEMNAME"; done; }
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' aws-keypair.sh`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE

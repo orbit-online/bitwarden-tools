@@ -25,33 +25,33 @@ Note:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$PKGROOT/docopt-lib-1.0.0.sh" '1.0.0' || { ret=$?
+docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:573}
-usage=${DOC:47:55}; digest=86bcb; shorts=(-j '' '' '' -e)
-longs=(--json --debug --cache-for --prefix ''); argcounts=(0 0 1 1 0); node_0(){
-switch __json 0; }; node_1(){ switch __debug 1; }; node_2(){ value __cache_for 2
-}; node_3(){ value __prefix 3; }; node_4(){ switch _e 4; }; node_5(){
+usage=${DOC:47:55}; digest=86bcb; shorts=('' -j '' '' -e)
+longs=(--prefix --json --debug --cache-for ''); argcounts=(1 0 0 1 0); node_0(){
+value __prefix 0; }; node_1(){ switch __json 1; }; node_2(){ switch __debug 2; }
+node_3(){ value __cache_for 3; }; node_4(){ switch _e 4; }; node_5(){
 value ITEMNAME a; }; node_6(){ value FIELD a true; }; node_7(){
 optional 0 1 2 3 4; }; node_8(){ optional 7; }; node_9(){ oneormore 6; }
 node_10(){ optional 9; }; node_11(){ required 8 5 10; }; node_12(){ required 11
 }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
-printf "%s\n" "${DOC:47:55}" >&2; exit 1; }'; unset var___json var___debug \
-var___cache_for var___prefix var__e var_ITEMNAME var_FIELD; parse 12 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__json" "${prefix}__debug" \
-"${prefix}__cache_for" "${prefix}__prefix" "${prefix}_e" "${prefix}ITEMNAME" \
-"${prefix}FIELD"; eval "${prefix}"'__json=${var___json:-false}'
+printf "%s\n" "${DOC:47:55}" >&2; exit 1; }'; unset var___prefix var___json \
+var___debug var___cache_for var__e var_ITEMNAME var_FIELD; parse 12 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__prefix" "${prefix}__json" \
+"${prefix}__debug" "${prefix}__cache_for" "${prefix}_e" "${prefix}ITEMNAME" \
+"${prefix}FIELD"; eval "${prefix}"'__prefix=${var___prefix:-}'
+eval "${prefix}"'__json=${var___json:-false}'
 eval "${prefix}"'__debug=${var___debug:-false}'
 eval "${prefix}"'__cache_for=${var___cache_for:-0}'
-eval "${prefix}"'__prefix=${var___prefix:-}'
 eval "${prefix}"'_e=${var__e:-false}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
 if declare -p var_FIELD >/dev/null 2>&1; then
 eval "${prefix}"'FIELD=("${var_FIELD[@]}")'; else eval "${prefix}"'FIELD=()'; fi
 local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
-for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" \
-"${prefix}__debug" "${prefix}__cache_for" "${prefix}__prefix" "${prefix}_e" \
+for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
+"${prefix}__json" "${prefix}__debug" "${prefix}__cache_for" "${prefix}_e" \
 "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/docopt-lib-1.0.0.sh"' bitwarden-fields.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
 
   checkdeps bw jq
 

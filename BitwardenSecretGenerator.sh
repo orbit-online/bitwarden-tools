@@ -18,7 +18,7 @@ ITEMNAME format:
 "
 # docopt parser below, refresh this parser with `docopt.sh BitwardenSecretGenerator.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$PKGROOT/docopt-lib-1.0.0.sh" '1.0.0' || { ret=$?
+docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:565}
 usage=${DOC:75:73}; digest=bc693; shorts=('' '' '')
 longs=(--namespace --type --name); argcounts=(1 1 1); node_0(){
@@ -40,7 +40,7 @@ local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
 "${prefix}__type" "${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"; done
 }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/docopt-lib-1.0.0.sh"' BitwardenSecretGenerator.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' BitwardenSecretGenerator.sh`
   checkdeps bw jq yq base64
   [[ $1 == *kust-plugin-config* ]] && shift
   eval "$(docopt "$@")"

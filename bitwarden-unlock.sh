@@ -17,20 +17,20 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-unlock.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$PKGROOT/docopt-lib-1.0.0.sh" '1.0.0' || { ret=$?
+docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:353}
-usage=${DOC:77:35}; digest=4c641; shorts=(-p ''); longs=(--purpose --debug)
-argcounts=(1 0); node_0(){ value __purpose 0; }; node_1(){ switch __debug 1; }
+usage=${DOC:77:35}; digest=4c641; shorts=('' -p); longs=(--debug --purpose)
+argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __purpose 1; }
 node_2(){ optional 0 1; }; node_3(){ optional 2; }; node_4(){ required 3; }
 node_5(){ required 4; }; cat <<<' docopt_exit() {
 [[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:77:35}" >&2; exit 1
-}'; unset var___purpose var___debug; parse 5 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__purpose" "${prefix}__debug"
-eval "${prefix}"'__purpose=${var___purpose:-}'
-eval "${prefix}"'__debug=${var___debug:-false}'; local docopt_i=1
+}'; unset var___debug var___purpose; parse 5 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__debug" "${prefix}__purpose"
+eval "${prefix}"'__debug=${var___debug:-false}'
+eval "${prefix}"'__purpose=${var___purpose:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}__purpose" "${prefix}__debug"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/docopt-lib-1.0.0.sh"' bitwarden-unlock.sh`
+declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' bitwarden-unlock.sh`
   eval "$(docopt "$@")"
 
   # shellcheck disable=2154

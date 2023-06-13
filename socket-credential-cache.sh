@@ -16,7 +16,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh socket-credential-cache.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$PKGROOT/docopt-lib-1.0.0.sh" '1.0.0' || { ret=$?
+docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:399}
 usage=${DOC:24:263}; digest=97de8; shorts=('' ''); longs=(--debug --timeout)
 argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __timeout 1; }
@@ -43,7 +43,7 @@ eval "${prefix}"'serve=${var_serve:-false}'; local docopt_i=1
 declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
 "${prefix}set" "${prefix}get" "${prefix}list" "${prefix}clear" "${prefix}serve"
 done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/docopt-lib-1.0.0.sh"' socket-credential-cache.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' socket-credential-cache.sh`
   eval "$(docopt "$@")"
 
   # shellcheck disable=2154
