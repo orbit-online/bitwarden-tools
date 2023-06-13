@@ -1,0 +1,15 @@
+{
+  "name": "bitwarden-tools",
+  "version": "1.0.0",
+  "description": "Scripts for integrating Bitwarden with other tooling.",
+  "scripts": [
+    "aws-keypair.sh",
+    "bitwarden-cache-items.sh",
+    "bitwarden-fields.sh",
+    "BitwardenSecretGenerator.sh",
+    "bitwarden-unlock.sh",
+    "k8s-cert.sh",
+    "k8s-oidc.sh",
+    "socket-credential-cache.sh"
+  ]
+}
