@@ -11,5 +11,8 @@
     "k8s-cert.sh",
     "k8s-oidc.sh",
     "socket-credential-cache.sh"
-  ]
+  ],
+  "dependencies": {
+    "orbit-online/records.sh": "0.9.0"
+  }
 }
