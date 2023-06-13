@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -e
 PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+
 # shellcheck source=deps/records.sh/records.sh
 source "$PKGROOT/deps/records.sh/records.sh"
 # shellcheck source=lib.sh

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+
 set -e
+PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
 
 bw_oidc() {
   DOC="Output OIDC credentials for a cluster

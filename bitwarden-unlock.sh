@@ -2,8 +2,11 @@
 
 set -e
 PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+
 # shellcheck source=deps/records.sh/records.sh
 source "$PKGROOT/deps/records.sh/records.sh"
+# shellcheck source=lib.sh
+source "$PKGROOT/lib.sh"
 
 unlock_bw() {
   DOC="Unlock Bitwarden, uses pinentry from GnuPG to prompt for the master password
