@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+bitwarden_secret_generator() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-# shellcheck source=deps/records.sh/records.sh
-source "$PKGROOT/deps/records.sh/records.sh"
-# shellcheck source=lib.sh
-source "$PKGROOT/lib.sh"
-
-main() {
   DOC="BitwardenSecretGenerator - Output a bitwarden entry as a kubernetes secret
 Usage:
   BitwardenSecretGenerator [options] --name=NAME ITEMNAME FIELD...
@@ -100,4 +99,6 @@ metadata:"
   printf -- "%s\n" "$secret"
 }
 
-main "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  bitwarden_secret_generator "$@"
+fi

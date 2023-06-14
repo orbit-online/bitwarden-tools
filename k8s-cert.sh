@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+k8s_cert() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
 
-bw_oidc() {
   DOC="Output client cert credentials for a cluster
 Usage:
   k8s-cert.sh ITEMNAME
@@ -36,4 +36,6 @@ declare -p "${prefix}ITEMNAME"; done; }
 }\n' "${tls_crt//$'\n'/\\n}" "${tls_key//$'\n'/\\n}"
 }
 
-bw_oidc "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  k8s_cert "$@"
+fi

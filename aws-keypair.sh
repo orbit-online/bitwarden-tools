@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-
 aws_keypair() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+
   DOC="Output AWS credentials stored in Bitwarden
 Usage:
   aws-keypair [options] ITEMNAME

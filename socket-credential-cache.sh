@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+socket_credential_cache() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-# shellcheck source=deps/records.sh/records.sh
-source "$PKGROOT/deps/records.sh/records.sh"
-# shellcheck source=lib.sh
-source "$PKGROOT/lib.sh"
-
-main() {
   DOC="socket-credential-cache
 Usage:
   socket-cache-credential [options] set [--timeout=S] ITEMNAME
@@ -71,32 +70,32 @@ done; }
   unitname="socket-credential-cache@$unitname.service"
 
   if [[ ${#socketsetuppath} -gt 108 ]]; then
-    fatal "socket-credential-cache.sh: Unable to cache '%s', the resulting socket path would be greater than 108 characters" "$ITEMNAME"
+    fatal "Unable to cache '%s', the resulting socket path would be greater than 108 characters" "$ITEMNAME"
   fi
 
   # shellcheck disable=2154
   if $set; then
     mkdir -p "$socketspath"
     if systemctl --user is-active --quiet "$unitname"; then
-      fatal "socket-credential-cache.sh: '%s' is already cached" "$ITEMNAME"
+      fatal "'%s' is already cached" "$ITEMNAME"
     fi
     if ! systemctl --user start --quiet "$unitname"; then
       if ! systemctl --user list-unit-files --plain --no-legend | grep -q socket-credential-cache@.service; then
-        fatal "socket-credential-cache.sh: Failed to start unit '%s'\nsocket-credential-cache@.service is not installed (run \`homeshick link')" "$unitname"
+        fatal "Failed to start unit '%s'\nsocket-credential-cache@.service is not installed (run \`homeshick link')" "$unitname"
       else
-        fatal "socket-credential-cache.sh: Failed to start unit '%s'" "$unitname"
+        fatal "Failed to start unit '%s'" "$unitname"
       fi
     fi
     if ! waitforsocket "$socketsetuppath"; then
       systemctl --user stop --quiet "$unitname"
-      fatal "socket-credential-cache.sh: Timed out waiting for '%s' to become ready" "$socketsetuppath"
+      fatal "Timed out waiting for '%s' to become ready" "$socketsetuppath"
     fi
     if ! (printf "%d\n" "$__timeout"; cat) | socat UNIX-CONNECT:"$socketsetuppath" STDIN 2>/dev/null; then
-      fatal "socket-credential-cache.sh: Failed to connect to '%s'" "$socketsetuppath"
+      fatal "Failed to connect to '%s'" "$socketsetuppath"
     fi
     if ! waitforsocket "$socketpath"; then
       systemctl --user stop --quiet "$unitname"
-      fatal "socket-credential-cache.sh: Timed out waiting for '%s' to become ready" "$socketpath"
+      fatal "Timed out waiting for '%s' to become ready" "$socketpath"
     fi
 
   elif $get; then
@@ -128,7 +127,7 @@ done; }
     systemd-notify --ready
     local DATA
     IFS= read -t 1 -r -d '' DATA < <(socat -t0 UNIX-LISTEN:"$socketsetuppath,unlink-close,umask=177" STDOUT) || true
-    [[ -z $DATA ]] && fatal "socket-credential-cache.sh: No data passed to setup socket '%s' or timeout exceeded" "$socketsetuppath"
+    [[ -z $DATA ]] && fatal "No data passed to setup socket '%s' or timeout exceeded" "$socketsetuppath"
     local EXTEND_TIMEOUT_USEC=$((${DATA%%$'\n'*} * 1000000))
     systemd-notify "EXTEND_TIMEOUT_USEC=$EXTEND_TIMEOUT_USEC"
     # shellcheck disable=2016,2097,2098
@@ -148,24 +147,6 @@ waitforsocket() {
   return 1
 }
 
-checkdeps() {
-  local deps=("$@")
-  local dep
-  local out
-  local ret=0
-  for dep in "${deps[@]}"; do
-    if ! out=$(type "$dep" 2>&1); then
-      fatal "socket-credential-cache.sh: Dependency %s not found:\n%s" "$dep" "$out"
-    fi
-  done
-  return $ret
-}
-
-fatal() {
-  # shellcheck disable=2059
-  printf -- "$@"
-  printf -- "\n"
-  exit 1
-}
-
-main "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  socket_credential_cache "$@"
+fi

@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+bitwarden_cache_items() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-# shellcheck source=deps/records.sh/records.sh
-source "$PKGROOT/deps/records.sh/records.sh"
-# shellcheck source=lib.sh
-source "$PKGROOT/lib.sh"
-
-bw_cache_items() {
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
 Usage:
   bitwarden-cache-items [options] ITEMNAME...
@@ -61,18 +60,6 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
   done
 }
 
-checkdeps() {
-  local deps=("$@")
-  local dep
-  local out
-  local ret=0
-  for dep in "${deps[@]}"; do
-    if ! out=$(type "$dep" 2>&1); then
-      error "Dependency %s not found: %s" "$dep" "$out"
-      ret=1
-    fi
-  done
-  return $ret
-}
-
-bw_cache_items "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  bitwarden_cache_items "$@"
+fi

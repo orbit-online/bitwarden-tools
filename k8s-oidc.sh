@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+k8s_oidc() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-bw_oidc() {
   DOC="Output OIDC credentials for a cluster
 Usage:
   k8s-oidc.sh ITEMNAME
@@ -34,4 +38,6 @@ declare -p "${prefix}ITEMNAME"; done; }
     --oidc-client-secret="$oidc_client_secret"
 }
 
-bw_oidc "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  k8s_oidc "$@"
+fi

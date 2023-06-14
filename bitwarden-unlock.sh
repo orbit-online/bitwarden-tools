@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+bitwarden_unlock() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-# shellcheck source=deps/records.sh/records.sh
-source "$PKGROOT/deps/records.sh/records.sh"
-# shellcheck source=lib.sh
-source "$PKGROOT/lib.sh"
-
-unlock_bw() {
   DOC="Unlock Bitwarden, uses pinentry from GnuPG to prompt for the master password
 Usage:
   bitwarden-unlock [options]
@@ -81,7 +80,7 @@ $pinentry_script_base"
         printf "%s\n" "$session_key"
         return 0
       elif [[ $tries -ge 3 ]]; then
-        fatal 1 "Unlocking Bitwarden failed"
+        fatal "Unlocking Bitwarden failed"
       fi
     elif [[ $out = *'ERR 83886179'* ]]; then
       return 2
@@ -89,18 +88,6 @@ $pinentry_script_base"
   done
 }
 
-checkdeps() {
-  local deps=("$@")
-  local dep
-  local out
-  local ret=0
-  for dep in "${deps[@]}"; do
-    if ! out=$(type "$dep" 2>&1); then
-      error "Dependency %s not found: %s" "$dep" "$out"
-      ret=1
-    fi
-  done
-  return $ret
-}
-
-unlock_bw "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  bitwarden_unlock "$@"
+fi

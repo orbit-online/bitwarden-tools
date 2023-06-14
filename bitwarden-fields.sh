@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-set -e
-PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+bitwarden_fields() {
+  set -e
+  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  # shellcheck source=deps/records.sh/records.sh
+  source "$PKGROOT/deps/records.sh/records.sh"
+  # shellcheck source=lib.sh
+  source "$PKGROOT/lib.sh"
 
-# shellcheck source=deps/records.sh/records.sh
-source "$PKGROOT/deps/records.sh/records.sh"
-# shellcheck source=lib.sh
-source "$PKGROOT/lib.sh"
-
-bw_fields() {
   DOC="Output Bitwarden item fields as bash variables
 Usage:
   bitwarden-fields [options] ITEMNAME [FIELD...]
@@ -166,4 +165,6 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   fi
 }
 
-bw_fields "$@"
+if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
+  bitwarden_fields "$@"
+fi
