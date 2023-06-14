@@ -2,11 +2,12 @@
 
 bitwarden_cache_items() {
   set -e
-  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  local pkgroot
+  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
   # shellcheck source=deps/records.sh/records.sh
-  source "$PKGROOT/deps/records.sh/records.sh"
+  source "$pkgroot/deps/records.sh/records.sh"
   # shellcheck source=lib.sh
-  source "$PKGROOT/lib.sh"
+  source "$pkgroot/lib.sh"
 
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
 Usage:
@@ -20,7 +21,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:396}
 usage=${DOC:62:52}; digest=8c983; shorts=('' -p); longs=(--cache-for --purpose)
 argcounts=(1 1); node_0(){ value __cache_for 0; }; node_1(){ value __purpose 1
@@ -38,7 +39,7 @@ eval "${prefix}"'ITEMNAME=()'; fi; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
 }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
   checkdeps socket-credential-cache bitwarden-fields
 
   eval "$(docopt "$@")"

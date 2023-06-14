@@ -2,7 +2,8 @@
 
 aws_keypair() {
   set -e
-  PKGROOT=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  local pkgroot
+  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
 
   DOC="Output AWS credentials stored in Bitwarden
 Usage:
@@ -14,7 +15,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh aws-keypair.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:251}
 usage=${DOC:43:39}; digest=805f4; shorts=(-e ''); longs=(--env --cache-for)
 argcounts=(0 1); node_0(){ switch __env 0; }; node_1(){ value __cache_for 1; }
@@ -29,7 +30,7 @@ eval "${prefix}"'__cache_for=${var___cache_for:-0}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__env" "${prefix}__cache_for" "${prefix}ITEMNAME"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' aws-keypair.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' aws-keypair.sh`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE

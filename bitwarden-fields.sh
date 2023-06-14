@@ -2,11 +2,12 @@
 
 bitwarden_fields() {
   set -e
-  PKGROOT=$(cd "$(dirname "$(bpkg realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
+  local pkgroot
+  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
   # shellcheck source=deps/records.sh/records.sh
-  source "$PKGROOT/deps/records.sh/records.sh"
+  source "$pkgroot/deps/records.sh/records.sh"
   # shellcheck source=lib.sh
-  source "$PKGROOT/lib.sh"
+  source "$pkgroot/lib.sh"
 
   DOC="Output Bitwarden item fields as bash variables
 Usage:
@@ -25,7 +26,7 @@ Note:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$PKGROOT/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:573}
 usage=${DOC:47:55}; digest=86bcb; shorts=('' -j '' '' -e)
 longs=(--prefix --json --debug --cache-for ''); argcounts=(1 0 0 1 0); node_0(){
@@ -51,7 +52,7 @@ local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
 "${prefix}__json" "${prefix}__debug" "${prefix}__cache_for" "${prefix}_e" \
 "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$PKGROOT/deps/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
 
   checkdeps bw jq
 
