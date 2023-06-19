@@ -3,9 +3,9 @@
 socket_credential_cache() {
   set -e
   local pkgroot
-  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-  # shellcheck source=deps/records.sh/records.sh
-  source "$pkgroot/deps/records.sh/records.sh"
+  pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
+  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   # shellcheck source=lib.sh
   source "$pkgroot/lib.sh"
 
@@ -23,7 +23,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh socket-credential-cache.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:399}
 usage=${DOC:24:263}; digest=97de8; shorts=('' ''); longs=(--debug --timeout)
 argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __timeout 1; }
@@ -50,7 +50,7 @@ eval "${prefix}"'serve=${var_serve:-false}'; local docopt_i=1
 declare -p "${prefix}__debug" "${prefix}__timeout" "${prefix}ITEMNAME" \
 "${prefix}set" "${prefix}get" "${prefix}list" "${prefix}clear" "${prefix}serve"
 done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' socket-credential-cache.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' socket-credential-cache.sh`
   eval "$(docopt "$@")"
 
   # shellcheck disable=2154

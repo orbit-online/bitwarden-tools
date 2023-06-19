@@ -3,9 +3,9 @@
 bitwarden_cache_items() {
   set -e
   local pkgroot
-  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-  # shellcheck source=deps/records.sh/records.sh
-  source "$pkgroot/deps/records.sh/records.sh"
+  pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
+  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   # shellcheck source=lib.sh
   source "$pkgroot/lib.sh"
 
@@ -21,7 +21,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:396}
 usage=${DOC:62:52}; digest=8c983; shorts=('' -p); longs=(--cache-for --purpose)
 argcounts=(1 1); node_0(){ value __cache_for 0; }; node_1(){ value __purpose 1
@@ -39,9 +39,7 @@ eval "${prefix}"'ITEMNAME=()'; fi; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
 }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
-  checkdeps socket-credential-cache bitwarden-fields
-
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
   eval "$(docopt "$@")"
 
   local name
@@ -49,14 +47,14 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
   for name in "${ITEMNAME[@]}"; do
     cache_name="Bitwarden $name"
     # shellcheck disable=2154
-    if ! socket-credential-cache get "$cache_name" >/dev/null 2>&1; then
+    if ! "$pkgroot/socket-credential-cache.sh" get "$cache_name" >/dev/null 2>&1; then
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
         # shellcheck disable=2154
         BW_SESSION=$(bitwarden-unlock --purpose="$__purpose")
         trap "bw lock >/dev/null" EXIT
       fi
-      bitwarden-fields --cache-for="$__cache_for" "$name" >/dev/null
+      "$pkgroot/bitwarden-fields.sh" --cache-for="$__cache_for" "$name" >/dev/null
     fi
   done
 }

@@ -3,9 +3,9 @@
 bitwarden_unlock() {
   set -e
   local pkgroot
-  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-  # shellcheck source=deps/records.sh/records.sh
-  source "$pkgroot/deps/records.sh/records.sh"
+  pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
+  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   # shellcheck source=lib.sh
   source "$pkgroot/lib.sh"
 
@@ -20,7 +20,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-unlock.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:353}
 usage=${DOC:77:35}; digest=4c641; shorts=('' -p); longs=(--debug --purpose)
 argcounts=(0 1); node_0(){ switch __debug 0; }; node_1(){ value __purpose 1; }
@@ -33,7 +33,7 @@ eval "${prefix}"'__debug=${var___debug:-false}'
 eval "${prefix}"'__purpose=${var___purpose:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' bitwarden-unlock.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-unlock.sh`
   eval "$(docopt "$@")"
 
   # shellcheck disable=2154

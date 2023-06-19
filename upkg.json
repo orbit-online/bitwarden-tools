@@ -1,0 +1,17 @@
+{
+  "files": ["lib.sh"],
+  "commands": {
+    "aws-keypair": "aws-keypair.sh",
+    "bitwarden-cache-items": "bitwarden-cache-items.sh",
+    "bitwarden-fields": "bitwarden-fields.sh",
+    "BitwardenSecretGenerator": "BitwardenSecretGenerator.sh",
+    "bitwarden-unlock": "bitwarden-unlock.sh",
+    "k8s-cert": "k8s-cert.sh",
+    "k8s-oidc": "k8s-oidc.sh",
+    "socket-credential-cache": "socket-credential-cache.sh"
+  },
+  "dependencies": {
+    "orbit-online/records.sh": "v0.9.2",
+    "andsens/docopt.sh": "v1.0.0-upkg"
+  }
+}

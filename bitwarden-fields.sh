@@ -3,9 +3,9 @@
 bitwarden_fields() {
   set -e
   local pkgroot
-  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-  # shellcheck source=deps/records.sh/records.sh
-  source "$pkgroot/deps/records.sh/records.sh"
+  pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
+  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   # shellcheck source=lib.sh
   source "$pkgroot/lib.sh"
 
@@ -26,7 +26,7 @@ Note:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:573}
 usage=${DOC:47:55}; digest=86bcb; shorts=('' -j '' '' -e)
 longs=(--prefix --json --debug --cache-for ''); argcounts=(1 0 0 1 0); node_0(){
@@ -52,7 +52,7 @@ local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
 "${prefix}__json" "${prefix}__debug" "${prefix}__cache_for" "${prefix}_e" \
 "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
 
   checkdeps bw jq
 
@@ -70,7 +70,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   flock 9
   trap "exec 9>&-" EXIT
   local was_cached=true
-  if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
+  if ! data=$("$pkgroot/socket-credential-cache.sh" get "$cache_name" 2>/dev/null); then
     was_cached=false
     if [[ -z $BW_SESSION ]]; then
       export BW_SESSION
@@ -162,7 +162,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   fi
   # shellcheck disable=2154
   if ! $was_cached && [[ $__cache_for -gt 0 ]]; then
-    socket-credential-cache --timeout="$__cache_for" set "$cache_name" <<<"$data"
+    "$pkgroot/socket-credential-cache.sh" --timeout="$__cache_for" set "$cache_name" <<<"$data"
   fi
 }
 

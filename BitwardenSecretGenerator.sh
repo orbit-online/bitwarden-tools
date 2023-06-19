@@ -3,9 +3,9 @@
 bitwarden_secret_generator() {
   set -e
   local pkgroot
-  pkgroot=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"; echo "$PWD")
-  # shellcheck source=deps/records.sh/records.sh
-  source "$pkgroot/deps/records.sh/records.sh"
+  pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
+  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   # shellcheck source=lib.sh
   source "$pkgroot/lib.sh"
 
@@ -25,7 +25,7 @@ ITEMNAME format:
 "
 # docopt parser below, refresh this parser with `docopt.sh BitwardenSecretGenerator.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$pkgroot/deps/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
 printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:565}
 usage=${DOC:75:73}; digest=bc693; shorts=('' '' '')
 longs=(--namespace --type --name); argcounts=(1 1 1); node_0(){
@@ -47,7 +47,7 @@ local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
 "${prefix}__type" "${prefix}__name" "${prefix}ITEMNAME" "${prefix}FIELD"; done
 }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/deps/docopt.sh/docopt-lib.sh"' BitwardenSecretGenerator.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' BitwardenSecretGenerator.sh`
   checkdeps bw jq yq base64
   [[ $1 == *kust-plugin-config* ]] && shift
   eval "$(docopt "$@")"
@@ -60,7 +60,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__namespace" \
     field_names+=("${BASH_REMATCH[4]}${BASH_REMATCH[6]}")
   done
 
-  data="$(bitwarden-fields --cache-for=900 --json "$ITEMNAME" "${field_names[@]}")"
+  data="$("$pkgroot/bitwarden-fields.sh" --cache-for=900 --json "$ITEMNAME" "${field_names[@]}")"
   secret="kind: Secret
 apiVersion: v1
 metadata:"
