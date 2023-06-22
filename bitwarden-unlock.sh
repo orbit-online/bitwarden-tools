@@ -89,6 +89,4 @@ $pinentry_script_base"
   done
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  bitwarden_unlock "$@"
-fi
+bitwarden_unlock "$@"

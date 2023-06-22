@@ -100,6 +100,4 @@ metadata:"
   printf -- "%s\n" "$secret"
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  bitwarden_secret_generator "$@"
-fi
+bitwarden_secret_generator "$@"

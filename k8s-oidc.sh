@@ -39,6 +39,4 @@ declare -p "${prefix}ITEMNAME"; done; }
     --oidc-client-secret="$oidc_client_secret"
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  k8s_oidc "$@"
-fi
+k8s_oidc "$@"

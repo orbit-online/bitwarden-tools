@@ -37,6 +37,4 @@ declare -p "${prefix}ITEMNAME"; done; }
 }\n' "${tls_crt//$'\n'/\\n}" "${tls_key//$'\n'/\\n}"
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  k8s_cert "$@"
-fi
+k8s_cert "$@"

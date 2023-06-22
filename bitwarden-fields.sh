@@ -166,6 +166,4 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   fi
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  bitwarden_fields "$@"
-fi
+bitwarden_fields "$@"

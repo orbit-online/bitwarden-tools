@@ -59,6 +59,4 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
   done
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  bitwarden_cache_items "$@"
-fi
+bitwarden_cache_items "$@"

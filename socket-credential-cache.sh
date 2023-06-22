@@ -148,6 +148,4 @@ waitforsocket() {
   return 1
 }
 
-if [[ ${BASH_SOURCE[0]} = "$0" ]]; then
-  socket_credential_cache "$@"
-fi
+socket_credential_cache "$@"
