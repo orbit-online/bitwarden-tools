@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 bitwarden_fields() {
-  set -e
+  set -eo pipefail
+  shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  # shellcheck source=lib.sh
-  source "$pkgroot/lib.sh"
+  PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="Output Bitwarden item fields as bash variables
 Usage:
@@ -54,7 +54,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
 "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
 
-  checkdeps bw jq
+  checkdeps bw jq socket-credential-cache
 
   eval "$(docopt "$@")"
 
@@ -70,7 +70,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   flock 9
   trap "exec 9>&-" EXIT
   local was_cached=true
-  if ! data=$("$pkgroot/socket-credential-cache.sh" get "$cache_name" 2>/dev/null); then
+  if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
     was_cached=false
     if [[ -z $BW_SESSION ]]; then
       export BW_SESSION
@@ -162,7 +162,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   fi
   # shellcheck disable=2154
   if ! $was_cached && [[ $__cache_for -gt 0 ]]; then
-    "$pkgroot/socket-credential-cache.sh" --timeout="$__cache_for" set "$cache_name" <<<"$data"
+    socket-credential-cache --timeout="$__cache_for" set "$cache_name" <<<"$data"
   fi
 }
 

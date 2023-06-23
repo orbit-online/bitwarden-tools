@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 bitwarden_cache_items() {
-  set -e
+  set -eo pipefail
+  shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  # shellcheck source=lib.sh
-  source "$pkgroot/lib.sh"
+  PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
 Usage:
@@ -42,12 +42,14 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
   eval "$(docopt "$@")"
 
+  checkdeps bw socket-credential-cache
+
   local name
   local cache_name
   for name in "${ITEMNAME[@]}"; do
     cache_name="Bitwarden $name"
     # shellcheck disable=2154
-    if ! "$pkgroot/socket-credential-cache.sh" get "$cache_name" >/dev/null 2>&1; then
+    if ! socket-credential-cache get "$cache_name" >/dev/null 2>&1; then
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
         # shellcheck disable=2154
