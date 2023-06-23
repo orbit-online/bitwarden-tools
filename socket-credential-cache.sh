@@ -82,7 +82,7 @@ done; }
     fi
     if ! systemctl --user start --quiet "$unitname"; then
       if ! systemctl --user list-unit-files --plain --no-legend | grep -q socket-credential-cache@.service; then
-        fatal "Failed to start unit '%s'\nsocket-credential-cache@.service is not installed (run \`homeshick link')" "$unitname"
+        fatal "Failed to start unit '%s'\nsocket-credential-cache@.service is not installed (refer to the README.md)" "$unitname"
       else
         fatal "Failed to start unit '%s'" "$unitname"
       fi

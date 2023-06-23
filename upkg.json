@@ -1,10 +1,9 @@
 {
-  "assets": ["lib.sh"],
+  "assets": ["lib.sh", "BitwardenSecretGenerator.sh"],
   "commands": {
     "aws-keypair": "aws-keypair.sh",
     "bitwarden-cache-items": "bitwarden-cache-items.sh",
     "bitwarden-fields": "bitwarden-fields.sh",
-    "BitwardenSecretGenerator": "BitwardenSecretGenerator.sh",
     "bitwarden-unlock": "bitwarden-unlock.sh",
     "k8s-cert": "k8s-cert.sh",
     "k8s-oidc": "k8s-oidc.sh",
@@ -12,6 +11,7 @@
   },
   "dependencies": {
     "orbit-online/records.sh": "v0.9.3",
-    "andsens/docopt.sh": "v1.0.0-upkg"
+    "andsens/docopt.sh": "v1.0.0-upkg",
+    "secoya/bitwarden-tools": "v1.0.1"
   }
 }

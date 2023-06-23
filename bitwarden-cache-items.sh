@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 bitwarden_cache_items() {
-  set -e
+  set -eo pipefail
+  shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
@@ -41,6 +42,8 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
 }
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
   eval "$(docopt "$@")"
+
+  checkdeps bw
 
   local name
   local cache_name
