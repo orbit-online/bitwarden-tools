@@ -2,7 +2,8 @@
   "commands": {
     "bitwarden-unlock": "bitwarden-unlock.sh",
     "bitwarden-fields": "bitwarden-fields.sh",
-    "bitwarden-cache-items": "bitwarden-cache-items.sh"
+    "bitwarden-cache-items": "bitwarden-cache-items.sh",
+    "bitwarden-value": "bitwarden-value.sh"
   },
   "dependencies": {
     "orbit-online/records.sh": "v0.9.3",
