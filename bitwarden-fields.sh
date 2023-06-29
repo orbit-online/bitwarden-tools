@@ -54,7 +54,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
 "${prefix}ITEMNAME" "${prefix}FIELD"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
 
-  checkdeps bw jq socket-credential-cache
+  checkdeps bw jq # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
 
   eval "$(docopt "$@")"
 
