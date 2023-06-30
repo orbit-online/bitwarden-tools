@@ -41,12 +41,7 @@ declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
     set -x
   fi
 
-  local PINENTRY="pinentry"
-  local pinentry_mac="pinentry-mac"
-  local pinentry_win="/mnt/c/Program Files (x86)/Gpg4win/bin/pinentry.exe"
-  type "$pinentry_mac" &>/dev/null && PINENTRY=$pinentry_mac
-  type "$pinentry_win" &>/dev/null && PINENTRY=$pinentry_win
-  checkdeps bw "$PINENTRY"
+  checkdeps bw
 
   # Prevent double unlocking by using a shared lock
   local LOCK_PATH="${TMP:-/tmp}/bitwarden-unlock.lock"
@@ -54,38 +49,30 @@ declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
   flock 9
   trap "exec 9>&-" EXIT
 
-  PURPOSE="Enter your Bitwarden Master Password"
+  local desc="Enter your Bitwarden Master Password"
   # shellcheck disable=2154
   if [[ -n $__purpose ]]; then
-    PURPOSE="$PURPOSE to $__purpose"
+    desc="$desc to $__purpose"
   fi
-  local pinentry_script pinentry_script_base="SETPROMPT Unlock Bitwarden
-SETDESC $PURPOSE
-SETOK Unlock
-SETCANCEL Abort
-GETPIN
-"
-  pinentry_script=$pinentry_script_base
-  local tries=0
+  local tries=0 errarg=() pass session_key
   while true; do
-    ((tries++)) || true
-    local out
-    out=$("$PINENTRY" <<<"$pinentry_script" || true)
-    if [[ $out = *$'\nOK' ]]; then
-      local pass=${out%%$'\nOK'}
-      pass=${pass##*$'\nD '}
-      pinentry_script="SETERROR Invalid password
-$pinentry_script_base"
-      local session_key
+    # shellcheck disable=2068
+    if ((tries >= 3)); then
+      fatal "Unlocking Bitwarden failed"
+    elif pass=$(pinentry-wrapper --desc "$desc" --ok Unlock --cancel Abort "${errarg[@]}" 'Unlock Bitwarden'); then
       if session_key=$(bw unlock --raw <<<"$pass" 2>/dev/null); then
         printf "%s\n" "$session_key"
         return 0
-      elif [[ $tries -ge 3 ]]; then
-        fatal "Unlocking Bitwarden failed"
+      else
+        errarg=(--error 'Invalid password')
       fi
-    elif [[ $out = *'ERR 83886179'* ]]; then
+    elif [[ $? -eq 2 ]]; then
+      # Cancelled
       return 2
+    else
+      fatal "An unknown error occurred"
     fi
+    ((tries++)) || true
   done
 }
 
