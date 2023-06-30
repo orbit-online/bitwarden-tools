@@ -12,6 +12,10 @@ Usage:
   bitwarden-value [options] [[--] ANYARGS...]
 
 Options:
+  -p --purpose PURPOSE  Specify why the master password is required.
+                        The text will be appended to
+                        'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"]
   --item ITEM    The name of the Bitwarden item [default: \$BW_ITEM]
   --field FIELD  The name of the field on the item [default: \$BW_FIELD]
 
@@ -51,7 +55,10 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__field" \
   checkdeps jq
   [[ $__item != "\$BW_ITEM" ]] || __item="$BW_ITEM"
   [[ $__field != "\$BW_FIELD" ]] || __field="$BW_FIELD"
-  bitwarden-fields --json "$__item" "$__field" | jq -re --arg field "$__field" '.[$field]'
+  if [[ $__purpose = "retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"" ]]; then
+    __purpose="retrieve \"$BW_FIELD\" from \"$BW_ITEM\""
+  fi
+  bitwarden-fields --purpose "$__purpose" --json "$__item" "$__field" | jq -re --arg field "$__field" '.[$field]'
 }
 
 bitwarden_value "$@"

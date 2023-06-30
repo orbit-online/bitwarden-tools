@@ -18,6 +18,7 @@ Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve the items \"\$ITEMNAME\"...]
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
@@ -46,6 +47,10 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
 
   local name
   local cache_name
+  if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
+    join_by() { local IFS="$1"; shift; echo "$*"; }
+    __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
+  fi
   for name in "${ITEMNAME[@]}"; do
     cache_name="Bitwarden $name"
     # shellcheck disable=2154
@@ -53,7 +58,7 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
         # shellcheck disable=2154
-        BW_SESSION=$(bitwarden-unlock --purpose="$__purpose")
+        BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
         trap "bw lock >/dev/null" EXIT
       fi
       "$pkgroot/bitwarden-fields.sh" --cache-for="$__cache_for" "$name" >/dev/null

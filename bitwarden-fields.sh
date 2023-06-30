@@ -14,11 +14,15 @@ Usage:
   bitwarden-fields [options] ITEMNAME [FIELD...]
 
 Options:
-  --cache-for=SECONDS  Cache item with socket-credential-cache [default: 0]
-  -j --json            Output as JSON instead of bash variables
-  --prefix=PREFIX      Prefix variable names with supplied string
-  -e                   Print 'false' on error
-  --debug              Turn on bash -x
+  -p --purpose PURPOSE  Specify why the master password is required.
+                        The text will be appended to
+                        'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve \"\$ITEMNAME\"]
+  --cache-for=SECONDS   Cache item with socket-credential-cache [default: 0]
+  -j --json             Output as JSON instead of bash variables
+  --prefix=PREFIX       Prefix variable names with supplied string
+  -e                    Print 'false' on error
+  --debug               Turn on bash -x
 Note:
   To retrieve attachments, prefix their name with \`attachment:\`
   For attachment IDs use \`attachmentid:\`
@@ -73,8 +77,11 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__prefix" \
   if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
     was_cached=false
     if [[ -z $BW_SESSION ]]; then
+      if [[ $__purpose = "retrieve \"\$ITEMNAME\"" ]]; then
+        __purpose="retrieve \"$ITEMNAME\""
+      fi
       export BW_SESSION
-      BW_SESSION=$(bitwarden-unlock --purpose="retrieve \"$ITEMNAME\"")
+      BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
       # shellcheck disable=2064
       trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
     fi
