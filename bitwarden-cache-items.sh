@@ -22,18 +22,19 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items.sh`
 # shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || { ret=$?
-printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e; trimmed_doc=${DOC:0:396}
-usage=${DOC:62:52}; digest=8c983; shorts=('' -p); longs=(--cache-for --purpose)
-argcounts=(1 1); node_0(){ value __cache_for 0; }; node_1(){ value __purpose 1
-}; node_2(){ value ITEMNAME a true; }; node_3(){ optional 0 1; }; node_4(){
-optional 3; }; node_5(){ oneormore 2; }; node_6(){ required 4 5; }; node_7(){
-required 6; }; cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
-printf "%s\n" "${DOC:62:52}" >&2; exit 1; }'; unset var___cache_for \
-var___purpose var_ITEMNAME; parse 7 "$@"; local prefix=${DOCOPT_PREFIX:-''}
-unset "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"
+docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || {
+ret=$?; printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e
+trimmed_doc=${DOC:0:465}; usage=${DOC:62:52}; digest=f36eb; shorts=('' -p)
+longs=(--cache-for --purpose); argcounts=(1 1); node_0(){ value __cache_for 0; }
+node_1(){ value __purpose 1; }; node_2(){ value ITEMNAME a true; }; node_3(){
+optional 0 1; }; node_4(){ optional 3; }; node_5(){ oneormore 2; }; node_6(){
+required 4 5; }; node_7(){ required 6; }; cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:62:52}" >&2; exit 1
+}'; unset var___cache_for var___purpose var_ITEMNAME; parse 7 "$@"
+local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__cache_for" \
+"${prefix}__purpose" "${prefix}ITEMNAME"
 eval "${prefix}"'__cache_for=${var___cache_for:-0}'
-eval "${prefix}"'__purpose=${var___purpose:-}'
+eval "${prefix}"'__purpose=${var___purpose:-'"'"'retrieve the items "$ITEMNAME"...'"'"'}'
 if declare -p var_ITEMNAME >/dev/null 2>&1; then
 eval "${prefix}"'ITEMNAME=("${var_ITEMNAME[@]}")'; else
 eval "${prefix}"'ITEMNAME=()'; fi; local docopt_i=1
