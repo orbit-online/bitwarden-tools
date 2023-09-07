@@ -85,7 +85,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__debug" \
         __purpose="retrieve \"$ITEMNAME\""
       fi
       export BW_SESSION
-      BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
+      BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$__purpose")
       # shellcheck disable=2064
       trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
     fi

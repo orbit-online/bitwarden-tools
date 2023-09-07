@@ -26,15 +26,15 @@ Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
-                        [default: retrieve \"\$ITEMNAME\"]
+                        [default: retrieve "$ITEMNAME"]
   --cache-for=SECONDS   Cache item with socket-credential-cache [default: 0]
   -j --json             Output as JSON instead of bash variables
   --prefix=PREFIX       Prefix variable names with supplied string
   -e                    Print 'false' on error
   --debug               Turn on bash -x
 Note:
-  To retrieve attachments, prefix their name with \`attachment:\`
-  For attachment IDs use \`attachmentid:\`
+  To retrieve attachments, prefix their name with `attachment:`
+  For attachment IDs use `attachmentid:`
   To retrieve all fields, omit the FIELD argument entirely
 ```
 
@@ -56,20 +56,34 @@ Options:
 ```
 Retrieve a single field value from Bitwarden and output it verbatim
 Usage:
-  bitwarden-value [options] [[--] ANYARGS...]
+  bitwarden-value [options] ITEM FIELD
 
 Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
-                        [default: retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"]
-  --item ITEM    The name of the Bitwarden item [default: \$BW_ITEM]
-  --field FIELD  The name of the field on the item [default: \$BW_FIELD]
+                        [default: retrieve "$FIELD" from "$ITEM"]
+```
+
+### bitwarden-ssh-askpass
+
+```
+Retrieve a single field value from Bitwarden and output it verbatim
+Usage:
+  bitwarden-ssh-askpass [options] [[--] ANYARGS...]
+
+Options:
+  -p --purpose PURPOSE  Specify why the master password is required.
+                        The text will be appended to
+                        'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve "$BW_FIELD" from "$BW_ITEM"]
+  --item ITEM    The name of the Bitwarden item [default: $BW_ITEM]
+  --field FIELD  The name of the field on the item [default: $BW_FIELD]
 
 Note:
   You can specify both parameters through environment variables. This allows
   bitwarden-value to be used as an SSH askpass program. e.g.:
-  env DISPLAY=':0.0' SSH_ASKPASS='bitwarden-value' \\
+  env DISPLAY=':0.0' SSH_ASKPASS='bitwarden-value' \
     BW_SESSION='...' BW_ITEM='SSH Key' BW_FIELD='passphrase' ssh ...
   Any arguments are ignored
 ```
@@ -86,5 +100,5 @@ Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
-                        [default: retrieve the items \"\$ITEMNAME\"...]
+                        [default: retrieve the items "$ITEMNAME"...]
 ```
