@@ -1,8 +1,9 @@
 {
   "commands": {
-    "bitwarden-unlock": "bitwarden-unlock.sh",
-    "bitwarden-fields": "bitwarden-fields.sh",
     "bitwarden-cache-items": "bitwarden-cache-items.sh",
+    "bitwarden-fields": "bitwarden-fields.sh",
+    "bitwarden-ssh-askpass": "bitwarden-ssh-askpass.sh",
+    "bitwarden-unlock": "bitwarden-unlock.sh",
     "bitwarden-value": "bitwarden-value.sh"
   },
   "dependencies": {
