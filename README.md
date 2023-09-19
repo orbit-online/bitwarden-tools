@@ -102,3 +102,16 @@ Options:
                         'Enter your Bitwarden Master Password to ...'
                         [default: retrieve the items "$ITEMNAME"...]
 ```
+
+### docker-credential-bitwarden
+
+```
+docker-credential-bitwarden - Bitwarden backing for docker logins
+Usage:
+  docker-credential-bitwarden get
+  docker-credential-bitwarden store
+
+Note:
+  Configure this backing in ~/.docker/config.json with
+  {"credsStore": "bitwarden"}
+```

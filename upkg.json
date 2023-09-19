@@ -4,7 +4,8 @@
     "bitwarden-fields": "bitwarden-fields.sh",
     "bitwarden-ssh-askpass": "bitwarden-ssh-askpass.sh",
     "bitwarden-unlock": "bitwarden-unlock.sh",
-    "bitwarden-value": "bitwarden-value.sh"
+    "bitwarden-value": "bitwarden-value.sh",
+    "docker-credential-bitwarden": "docker-credential-bitwarden.sh"
   },
   "dependencies": {
     "orbit-online/records.sh": "v0.9.3",
