@@ -117,3 +117,20 @@ Note:
   Configure this backing in ~/.docker/config.json with
   {"credsStore": "bitwarden"}
 ```
+
+### bitwarden-aws-keypair
+
+```
+Output AWS credentials stored in Bitwarden
+Usage:
+  bitwarden-aws-keypair [options] ITEMNAME
+
+Options:
+  --env, -e            Output credentials as exported bash vars instead of json
+  --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
+
+Notes:
+  Configure in ~/.aws/config with:
+  [profile user]
+  credential_process = bitwarden-aws-keypair --cache-for=900 "AWS API user"
+```
