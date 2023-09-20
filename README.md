@@ -110,6 +110,8 @@ docker-credential-bitwarden - Bitwarden backing for docker logins
 Usage:
   docker-credential-bitwarden get
   docker-credential-bitwarden store
+  docker-credential-bitwarden erase
+  docker-credential-bitwarden list
 
 Note:
   Configure this backing in ~/.docker/config.json with
