@@ -7,6 +7,8 @@ bitwarden_cache_items() {
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
+  # shellcheck source=.upkg/orbit-online/collections.sh/collections.sh
+  source "$pkgroot/.upkg/orbit-online/collections.sh/collections.sh"
   PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
@@ -49,7 +51,6 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}ITEMNAME"; done
   local name
   local cache_name
   if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
-    join_by() { local IFS="$1"; shift; echo "$*"; }
     __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
   fi
   for name in "${ITEMNAME[@]}"; do
