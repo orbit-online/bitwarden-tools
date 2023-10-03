@@ -13,10 +13,7 @@ docker_credential_bitwarden() {
 
   DOC="docker-credential-bitwarden - Bitwarden backing for docker logins
 Usage:
-  docker-credential-bitwarden get
-  docker-credential-bitwarden store
-  docker-credential-bitwarden erase
-  docker-credential-bitwarden list
+  docker-credential-bitwarden (get|store|erase|list|version)
 
 Note:
   Configure this backing in ~/.docker/config.json with
@@ -26,21 +23,23 @@ Note:
 # shellcheck disable=2016,1090,1091,2034
 docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || {
 ret=$?; printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e
-trimmed_doc=${DOC:0:305}; usage=${DOC:66:147}; digest=5497c; shorts=(); longs=()
+trimmed_doc=${DOC:0:225}; usage=${DOC:66:67}; digest=a1f4e; shorts=(); longs=()
 argcounts=(); node_0(){ _command get; }; node_1(){ _command store; }; node_2(){
-_command erase; }; node_3(){ _command list; }; node_4(){ required 0; }
-node_5(){ required 1; }; node_6(){ required 2; }; node_7(){ required 3; }
-node_8(){ either 4 5 6 7; }; node_9(){ required 8; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:66:147}" >&2; exit 1
-}'; unset var_get var_store var_erase var_list; parse 9 "$@"
+_command erase; }; node_3(){ _command list; }; node_4(){ _command version; }
+node_5(){ either 0 1 2 3 4; }; node_6(){ required 5; }; node_7(){ required 6; }
+node_8(){ required 7; }; cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:66:67}" >&2; exit 1
+}'; unset var_get var_store var_erase var_list var_version; parse 8 "$@"
 local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}get" "${prefix}store" \
-"${prefix}erase" "${prefix}list"; eval "${prefix}"'get=${var_get:-false}'
+"${prefix}erase" "${prefix}list" "${prefix}version"
+eval "${prefix}"'get=${var_get:-false}'
 eval "${prefix}"'store=${var_store:-false}'
 eval "${prefix}"'erase=${var_erase:-false}'
-eval "${prefix}"'list=${var_list:-false}'; local docopt_i=1
+eval "${prefix}"'list=${var_list:-false}'
+eval "${prefix}"'version=${var_version:-false}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
-declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list"
-done; }
+declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
+"${prefix}version"; done; }
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' docker-credential-bitwarden.sh`
   eval "$(docopt "$@")"
 
@@ -54,6 +53,9 @@ done; }
     creds_del
   elif $list; then
     creds_list
+  elif $version; then
+    printf "docker-credential-bitwarden (github.com/orbit-online/bitwarden-tools) %s\n" \
+      "$(jq -re '.version // empty' "$pkgroot/upkg.json" || git symbolic-ref HEAD)"
   else
     fatal 'Unknown subcommand: "%s"' "$1"
   fi
@@ -62,8 +64,23 @@ done; }
 creds_get() {
   local registry item_name
   registry=$(cat)
+  registry=${registry%/*}
   item_name="Container Registry - $registry"
-  eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for=$CACHE_FOR "$item_name" username password 2>/dev/null)"
+  if [[ $(socket-credential-cache get "docker-cred-bw $registry" 2>/dev/null) = 'Not found' ]]; then
+    printf "credentials not found in Bitwarden (cached result)\n"
+    return 1
+  fi
+  if eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for=$CACHE_FOR "$item_name" username password 2>/dev/null)"; then
+    :
+  elif [[ $? -gt 2 ]]; then
+    # Remember for the next 30 seconds that this credential does not exist
+    socket-credential-cache set --timeout 30 "docker-cred-bw $registry" <<<'Not found'
+    printf "credentials not found in Bitwarden\n"
+    return 1
+  else
+    printf "credentials not found in Bitwarden (unlock failed or internal error)\n"
+    return 1
+  fi
   # shellcheck disable=2154
   jq -c --arg serverurl "$registry" --arg username "$username" --arg secret "$password" '.ServerURL=$serverurl | .Username=$username | .Secret=$secret' <<<"{}"
 }
@@ -97,6 +114,7 @@ creds_store() {
 creds_del() {
   local registry item_name
   registry=$(cat)
+  registry=${registry%/*}
   item_name="Container Registry - $registry"
   unlock_bw "Remove credentials for \"$item_name\""
   if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
