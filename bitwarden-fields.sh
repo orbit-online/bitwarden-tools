@@ -90,9 +90,9 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__debug" \
       trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
     fi
     if ! data=$(bw --nointeraction --raw get item "$ITEMNAME" </dev/null); then
-      printf "\n"
+      printf "\n" >&2
       # shellcheck disable=2154
-      [[ $_e != 'true' ]] || printf "false\n"
+      ! $_e || printf "false\n"
       fatal "Unable to retrieve '%s'" "$ITEMNAME"
     fi
     local item_id
@@ -128,31 +128,31 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__debug" \
     # Command substitution removes all trailing newlines, so we append an ETX (end of text) char and then remove it afterwards
     if [[ $field_name = id ]]; then
       if ! value=$(jq -jre '.id' <<<"$data" && printf '\3'); then
-        [[ $_e != 'true' ]] || printf "false\n"
+        ! $_e || printf "false\n"
         fatal "Unable to retried the ID field."
       fi
     elif [[ $field_name = username || $field_name = password || $field_name = totp || $field_name = uris || $field_name = passwordRevisionDate ]]; then
       if ! value=$(jq -jre --arg name "$field_name" '.login[$name]' <<<"$data" && printf '\3'); then
-        [[ $_e != 'true' ]] || printf "false\n"
+        ! $_e || printf "false\n"
         fatal "The field %s is not set." "$field_name"
       fi
     elif [[ $field_name = attachmentid:* ]]; then
       local attachment_id=${field_name/#attachmentid:/}
       variable_name=${variable_name/#attachmentid:/}
       if ! value=$(jq -jre --arg id "$attachment_id" '.attachments[] | select(.id==$id).data' <<<"$data" && printf '\3'); then
-        [[ $_e != 'true' ]] || printf "false\n"
+        ! $_e || printf "false\n"
         fatal "The attachment %s does not exist." "$attachment_id"
       fi
     elif [[ $field_name = attachment:* ]]; then
       local attachment_name=${field_name/#attachment:/}
       variable_name=${variable_name/#attachment:/}
       if ! value=$(jq -jre --arg name "$attachment_name" '.attachments[] | select(.fileName==$name).data' <<<"$data" && printf '\3'); then
-        [[ $_e != 'true' ]] || printf "false\n"
+        ! $_e || printf "false\n"
         fatal "The attachment %s does not exist." "$attachment_name"
       fi
     else
       if ! value=$(jq -jre --arg name "$field_name" '.fields[] | select(.name==$name).value' <<<"$data" && printf '\3'); then
-        [[ $_e != 'true' ]] || printf "false\n"
+        ! $_e || printf "false\n"
         fatal "The field %s is not set." "$field_name"
       fi
     fi

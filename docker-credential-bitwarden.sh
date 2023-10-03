@@ -64,6 +64,7 @@ creds_get() {
   registry=$(cat)
   item_name="Container Registry - $registry"
   eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for=$CACHE_FOR "$item_name" username password 2>/dev/null)"
+  # shellcheck disable=2154
   jq -c --arg serverurl "$registry" --arg username "$username" --arg secret "$password" '.ServerURL=$serverurl | .Username=$username | .Secret=$secret' <<<"{}"
 }
 
