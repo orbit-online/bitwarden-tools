@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Exit codes
-# 1: Unlock failed
-# 2: Internal error
+# 1: Internal error
+# 2: Unlock failed
 # 3: Item not found
 # 4: Field not found
 
@@ -98,7 +98,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" "${prefix}_e" \
       fi
       export BW_SESSION
       if ! BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$__purpose"); then
-        exit_fatal 1 "Unlocking bitwarden failed"
+        exit_fatal 2 "Unlocking bitwarden failed"
       fi
       # shellcheck disable=2064
       trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
