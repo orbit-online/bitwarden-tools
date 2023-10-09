@@ -67,18 +67,22 @@ creds_get() {
   registry=${registry%/*}
   item_name="Container Registry - $registry"
   if [[ $(socket-credential-cache get "docker-cred-bw $registry" 2>/dev/null) = 'Not found' ]]; then
-    printf "credentials not found in Bitwarden (cached result)\n"
+    # Cached not found case
+    # Do not change these error messages. They are part of the protocol!
+    printf "credentials not found in native keychain\n"
     return 1
   fi
   if eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for=$CACHE_FOR "$item_name" username password 2>/dev/null)"; then
     :
   elif [[ $? -gt 2 ]]; then
+    # Not found case (cache not found)
     # Remember for the next 30 seconds that this credential does not exist
     socket-credential-cache set --timeout 30 "docker-cred-bw $registry" <<<'Not found'
-    printf "credentials not found in Bitwarden\n"
+    printf "credentials not found in native keychain\n"
     return 1
   else
-    printf "credentials not found in Bitwarden (unlock failed or internal error)\n"
+    # Login failed case (don't cache)
+    printf "credentials not found in in native keychain\n"
     return 1
   fi
   # shellcheck disable=2154
