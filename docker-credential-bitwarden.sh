@@ -76,8 +76,7 @@ creds_get() {
     :
   elif [[ $? -gt 2 ]]; then
     # Not found case (cache not found)
-    # Remember for the next 30 seconds that this credential does not exist
-    socket-credential-cache set --timeout 30 "docker-cred-bw $registry" <<<'Not found'
+    socket-credential-cache set --timeout $CACHE_FOR "docker-cred-bw $registry" <<<'Not found'
     printf "credentials not found in native keychain\n"
     return 1
   else
