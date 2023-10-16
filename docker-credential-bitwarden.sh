@@ -62,6 +62,10 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
 }
 
 creds_get() {
+  if ${DOCKER_CREDENTIAL_BITWARDEN_FORCE_ANONYMOUS:-false}; then
+    printf "credentials not found in native keychain\n"
+    return 1
+  fi
   local registry item_name
   registry=$(cat)
   registry=${registry%/*}
