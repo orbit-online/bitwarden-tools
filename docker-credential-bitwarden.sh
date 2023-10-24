@@ -56,7 +56,7 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
     creds_list
   elif $version; then
     printf "docker-credential-bitwarden (github.com/orbit-online/bitwarden-tools) %s\n" \
-      "$(jq -re '.version // empty' "$pkgroot/upkg.json" || git symbolic-ref -C "$pkgroot" HEAD)"
+      "$(jq -re '.version // empty' "$pkgroot/upkg.json" || git -C "$pkgroot" symbolic-ref HEAD)"
   else
     fatal 'Unknown subcommand: "%s"' "$1"
   fi
