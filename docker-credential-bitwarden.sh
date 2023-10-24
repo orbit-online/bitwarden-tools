@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 CACHE_FOR=$((60 * 60 * 8))
+CACHE_NAME=docker-credential-bitwarden
 
 docker_credential_bitwarden() {
   set -eo pipefail
@@ -61,46 +62,43 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
   fi
 }
 
+creds_cache() {
+  if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
+    unlock_bw "Retrieve all container registry credentials"
+    local credentials
+    credentials=$(bw list items --search "Container Registry - ")
+    socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
+    printf "%s\n" "$credentials"
+  fi
+}
+
 creds_get() {
   if ${DOCKER_CREDENTIAL_BITWARDEN_FORCE_ANONYMOUS:-false}; then
     printf "credentials not found in native keychain\n"
     return 1
   fi
-  local registry item_name
+  local registry credentials
   registry=$(cat)
-  registry=${registry%/*}
-  item_name="Container Registry - $registry"
-  if [[ $(socket-credential-cache get "docker-cred-bw $registry" 2>/dev/null) = 'Not found' ]]; then
-    # Cached not found case
-    # Do not change these error messages. They are part of the protocol!
-    printf "credentials not found in native keychain\n"
-    return 1
-  fi
-  if eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for=$CACHE_FOR "$item_name" username password 2>/dev/null)"; then
-    :
-  elif [[ $? -gt 2 ]]; then
-    # Not found case (cache not found)
-    socket-credential-cache set --timeout $CACHE_FOR "docker-cred-bw $registry" <<<'Not found'
-    printf "credentials not found in native keychain\n"
-    return 1
-  else
-    # Login failed case (don't cache)
-    printf "credentials not found in in native keychain\n"
-    return 1
-  fi
-  # shellcheck disable=2154
-  jq -c --arg serverurl "$registry" --arg username "$username" --arg secret "$password" '.ServerURL=$serverurl | .Username=$username | .Secret=$secret' <<<"{}"
+  jq -ce --arg registry "$registry" '
+    first(.[] | select(.name == "Container Registry - \($registry)")) |
+    {ServerURL: .login.uris[0].uri, Username: .login.username, Secret: .login.password} // empty' \
+    <<<"$(creds_cache)" || {
+      printf "credentials not found in native keychain\n"
+      return 1
+    }
 }
 
 creds_store() {
   local details=()
   readarray -t -d$'\n' details <<<"$(jq -re '.ServerURL,.Username,.Secret')"
-  local bw_item_id item_name registry=${details[0]} username=${details[1]} secret=${details[2]}
-  item_name="Container Registry - $registry"
-  if [[ "$username:$secret" = $(socket-credential-cache get "Bitwarden $item_name" 2>/dev/null | jq -r '"\(.login.username):\(.login.password)"') ]]; then
+  local registry=${details[0]} username=${details[1]} secret=${details[2]}
+  if [[ "$username:$secret" = $(socket-credential-cache get "$CACHE_NAME" 2>/dev/null | \
+    jq -re --arg registry "$registry" 'first(.[] | select(.name == "Container Registry - \($registry)")) | "\(.login.username):\(.login.password)"') ]]; then
     # docker always stores the creds after fetching them
     return 0
   fi
+  local item_name credentials bw_item_id
+  item_name="Container Registry - $registry"
   unlock_bw "Store credentials for \"$item_name\""
   if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
@@ -114,25 +112,23 @@ creds_store() {
       "password": "%s"
     }
   }' "$item_name" "$registry" "$username" "$secret" | base64 -w0 | bw --nointeraction --quiet create item
-  socket-credential-cache clear "Bitwarden $item_name"
-  "$pkgroot/bitwarden-cache-items.sh" --cache-for=$CACHE_FOR "$item_name"
+  socket-credential-cache clear "$CACHE_NAME"
+  creds_cache
 }
 
 creds_del() {
-  local registry item_name
-  registry=$(cat)
-  registry=${registry%/*}
-  item_name="Container Registry - $registry"
+  local item_name
+  item_name="Container Registry - $(cat)"
   unlock_bw "Remove credentials for \"$item_name\""
   if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
-  socket-credential-cache clear "Bitwarden $item_name"
+  socket-credential-cache clear "$CACHE_NAME"
+  creds_cache
 }
 
 creds_list() {
-  unlock_bw "Retrieve all container registry credentials"
-  bw list items --search "Container Registry - " | jq -c '[.[] | {key: .login.uris[0].uri, value: .login.username}] | from_entries'
+  creds_cache | jq -c '[.[] | {key: .login.uris[0].uri, value: .login.username}] | from_entries'
 }
 
 unlock_bw() {
