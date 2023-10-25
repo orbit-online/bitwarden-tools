@@ -113,7 +113,7 @@ creds_store() {
     }
   }' "$item_name" "$registry" "$username" "$secret" | base64 -w0 | bw --nointeraction --quiet create item
   socket-credential-cache clear "$CACHE_NAME"
-  creds_cache
+  creds_cache >/dev/null
 }
 
 creds_del() {
@@ -124,7 +124,7 @@ creds_del() {
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
   socket-credential-cache clear "$CACHE_NAME"
-  creds_cache
+  creds_cache >/dev/null
 }
 
 creds_list() {
