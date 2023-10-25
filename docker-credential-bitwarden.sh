@@ -64,7 +64,7 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
 
 creds_cache() {
   if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
-    unlock_bw "Retrieve all container registry credentials"
+    unlock_bw "retrieve all container registry credentials"
     local credentials
     credentials=$(bw list items --search "Container Registry - ")
     socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
@@ -99,7 +99,7 @@ creds_store() {
   fi
   local item_name credentials bw_item_id
   item_name="Container Registry - $registry"
-  unlock_bw "Store credentials for \"$item_name\""
+  unlock_bw "store credentials for \"$item_name\""
   if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
@@ -119,7 +119,7 @@ creds_store() {
 creds_del() {
   local item_name
   item_name="Container Registry - $(cat)"
-  unlock_bw "Remove credentials for \"$item_name\""
+  unlock_bw "remove credentials for \"$item_name\""
   if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
