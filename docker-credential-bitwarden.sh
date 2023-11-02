@@ -66,7 +66,7 @@ creds_cache() {
   if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
     unlock_bw "retrieve all container registry credentials"
     local credentials
-    credentials=$(bw list items --search "Container Registry - ")
+    credentials=$(bw --nointeraction list items --search "Container Registry - ")
     socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
     printf "%s\n" "$credentials"
   fi
@@ -152,7 +152,7 @@ unlock_bw() {
     export BW_SESSION
     BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$purpose")
     # shellcheck disable=2064
-    trap "BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
+    trap "BW_SESSION=\"$BW_SESSION\" bw --nointeraction lock >/dev/null" EXIT
   fi
 }
 
