@@ -7,6 +7,8 @@ bitwarden_unlock() {
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
+  # shellcheck source=common.sh
+  source "$pkgroot/common.sh"
   PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="Unlock Bitwarden, uses pinentry from GnuPG to prompt for the master password
@@ -42,13 +44,7 @@ declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
   fi
 
   checkdeps bw
-
-  # Prevent double unlocking by using a shared lock
-  local LOCK_PATH="${TMP:-/tmp}/bitwarden-unlock.lock"
-  exec 9<>"$LOCK_PATH"
-  flock 9
-  trap "exec 9>&-" EXIT
-
+  bw_lock "unlock"
   local desc="Enter your Bitwarden Master Password"
   # shellcheck disable=2154
   if [[ -n $__purpose ]]; then

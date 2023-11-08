@@ -13,6 +13,8 @@ bitwarden_fields() {
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
+  # shellcheck source=common.sh
+  source "$pkgroot/common.sh"
   PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="Output Bitwarden item fields as bash variables
@@ -83,12 +85,9 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" "${prefix}_e" \
   else
     exit_fatal() { fatal "$@"; }
   fi
-  local data lockdir="/var/run/lock/bitwarden-fields" cache_name="Bitwarden $ITEMNAME"
-  [[ -d "$lockdir" ]] || mkdir "$lockdir"
-  local lockpath="$lockdir/${ITEMNAME//[^A-Za-z0-9_]/_}.lock"
-  exec 9<>"$lockpath"
-  flock 9
-  trap "exec 9>&-" EXIT
+  local data cache_name="Bitwarden $ITEMNAME"
+  bw_lock "fields $ITEMNAME"
+
   local was_cached=true
   if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
     was_cached=false

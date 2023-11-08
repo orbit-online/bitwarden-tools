@@ -7,6 +7,7 @@
     "bitwarden-value": "bitwarden-value.sh",
     "docker-credential-bitwarden": "docker-credential-bitwarden.sh"
   },
+  "assets": ["common.sh"],
   "dependencies": {
     "orbit-online/records.sh": "v0.9.3",
     "orbit-online/pinentry-wrapper": "v0.10.1",

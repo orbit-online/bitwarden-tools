@@ -10,6 +10,8 @@ docker_credential_bitwarden() {
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
   # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
+  # shellcheck source=common.sh
+  source "$pkgroot/common.sh"
   PATH="$pkgroot/.upkg/.bin:$PATH"
 
   DOC="docker-credential-bitwarden - Bitwarden backing for docker logins
@@ -45,6 +47,8 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
   eval "$(docopt "$@")"
 
   checkdeps bw jq socket-credential-cache
+  bw_lock "docker-credential-bitwarden"
+
   # shellcheck disable=2154
   if $get; then
     creds_get
