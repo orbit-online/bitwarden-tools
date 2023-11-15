@@ -86,42 +86,45 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" "${prefix}_e" \
     exit_fatal() { fatal "$@"; }
   fi
   local data cache_name="Bitwarden $ITEMNAME"
-  bw_lock "fields $ITEMNAME"
 
   local was_cached=true
   if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
-    was_cached=false
-    if [[ -z $BW_SESSION ]]; then
-      if [[ $__purpose = "retrieve \"\$ITEMNAME\"" ]]; then
-        __purpose="retrieve \"$ITEMNAME\""
+    # Check again, the line above is a race condition
+    bw_acquire_lock "fields $ITEMNAME"
+    if ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
+      was_cached=false
+      if [[ -z $BW_SESSION ]]; then
+        if [[ $__purpose = "retrieve \"\$ITEMNAME\"" ]]; then
+          __purpose="retrieve \"$ITEMNAME\""
+        fi
+        export BW_SESSION
+        if ! BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$__purpose"); then
+          exit_fatal 2 "Unlocking bitwarden failed"
+        fi
+        # shellcheck disable=2064
+        trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
       fi
-      export BW_SESSION
-      if ! BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$__purpose"); then
-        exit_fatal 2 "Unlocking bitwarden failed"
+      if ! data=$(bw --nointeraction --raw get item "$ITEMNAME" </dev/null); then
+        printf "\n" >&2
+        exit_fatal 3 "Unable to retrieve '%s'" "$ITEMNAME"
       fi
-      # shellcheck disable=2064
-      trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
+      local item_id
+      item_id=$(jq -r '.id' <<<"$data")
+      local attachment_id
+      local attachment_path
+      for attachment_id in $(jq -r '(.attachments // [])[].id' <<<"$data"); do
+        attachment_path=$(mktemp)
+        bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path" </dev/null
+        data=$(
+          jq --arg id "$attachment_id" '.attachments[(.attachments | map(.id == $id) | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
+          <<<"$data"
+          r=$?
+          rm "$attachment_path"
+          exit $r
+        )
+      done
+      unset BW_SESSION
     fi
-    if ! data=$(bw --nointeraction --raw get item "$ITEMNAME" </dev/null); then
-      printf "\n" >&2
-      exit_fatal 3 "Unable to retrieve '%s'" "$ITEMNAME"
-    fi
-    local item_id
-    item_id=$(jq -r '.id' <<<"$data")
-    local attachment_id
-    local attachment_path
-    for attachment_id in $(jq -r '(.attachments // [])[].id' <<<"$data"); do
-      attachment_path=$(mktemp)
-      bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path" </dev/null
-      data=$(
-        jq --arg id "$attachment_id" '.attachments[(.attachments | map(.id == $id) | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
-        <<<"$data"
-        r=$?
-        rm "$attachment_path"
-        exit $r
-      )
-    done
-    unset BW_SESSION
   fi
   # shellcheck disable=2154
   if $__json; then

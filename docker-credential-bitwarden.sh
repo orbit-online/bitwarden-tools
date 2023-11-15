@@ -47,7 +47,6 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
   eval "$(docopt "$@")"
 
   checkdeps bw jq socket-credential-cache
-  bw_lock "docker-credential-bitwarden"
 
   # shellcheck disable=2154
   if $get; then
@@ -68,11 +67,15 @@ declare -p "${prefix}get" "${prefix}store" "${prefix}erase" "${prefix}list" \
 
 creds_cache() {
   if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
-    unlock_bw "retrieve all container registry credentials"
-    local credentials
-    credentials=$(bw --nointeraction list items --search "Container Registry - ")
-    socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
-    printf "%s\n" "$credentials"
+    bw_acquire_lock "$CACHE_NAME"
+    # Check again, the line above is a race condition
+    if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
+      unlock_bw "retrieve all container registry credentials"
+      local credentials
+      credentials=$(bw --nointeraction list items --search "Container Registry - ")
+      socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
+      printf "%s\n" "$credentials"
+    fi
   fi
 }
 

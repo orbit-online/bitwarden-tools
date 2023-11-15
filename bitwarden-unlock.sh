@@ -44,7 +44,7 @@ declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
   fi
 
   checkdeps bw
-  bw_lock "unlock"
+  bw_acquire_lock "unlock"
   local desc="Enter your Bitwarden Master Password"
   # shellcheck disable=2154
   if [[ -n $__purpose ]]; then
