@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 
 bitwarden_unlock() {
-  set -eo pipefail
-  shopt -s inherit_errexit
+  set -eo pipefail; shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
-  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  # shellcheck source=common.sh
   source "$pkgroot/common.sh"
-  PATH="$pkgroot/.upkg/.bin:$PATH"
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Unlock Bitwarden, uses pinentry from GnuPG to prompt for the master password
 Usage:

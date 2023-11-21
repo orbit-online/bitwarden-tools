@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
 bitwarden_value() {
-  set -eo pipefail
-  shopt -s inherit_errexit
+  set -eo pipefail; shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
-  PATH="$pkgroot/.upkg/.bin:$PATH"
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Retrieve a single field value from Bitwarden and output it verbatim
 Usage:

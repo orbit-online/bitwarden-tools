@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 
 bitwarden_cache_items() {
-  set -eo pipefail
-  shopt -s inherit_errexit
+  set -eo pipefail; shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
-  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  # shellcheck source=.upkg/orbit-online/collections.sh/collections.sh
   source "$pkgroot/.upkg/orbit-online/collections.sh/collections.sh"
-  PATH="$pkgroot/.upkg/.bin:$PATH"
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
 Usage:

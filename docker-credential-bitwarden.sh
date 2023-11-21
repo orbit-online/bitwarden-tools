@@ -4,15 +4,12 @@ CACHE_FOR=$((60 * 60 * 8))
 CACHE_NAME=docker-credential-bitwarden
 
 docker_credential_bitwarden() {
-  set -eo pipefail
-  shopt -s inherit_errexit
+  set -eo pipefail; shopt -s inherit_errexit
   local pkgroot
   pkgroot=$(upkg root "${BASH_SOURCE[0]}")
-  # shellcheck source=.upkg/orbit-online/records.sh/records.sh
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  # shellcheck source=common.sh
   source "$pkgroot/common.sh"
-  PATH="$pkgroot/.upkg/.bin:$PATH"
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="docker-credential-bitwarden - Bitwarden backing for docker logins
 Usage:
