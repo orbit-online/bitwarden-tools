@@ -1,5 +1,6 @@
 {
   "commands": {
+    "bitwarden-aws-keypair": "bitwarden-aws-keypair.sh",
     "bitwarden-cache-items": "bitwarden-cache-items.sh",
     "bitwarden-fields": "bitwarden-fields.sh",
     "bitwarden-ssh-askpass": "bitwarden-ssh-askpass.sh",
