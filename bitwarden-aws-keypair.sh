@@ -3,7 +3,6 @@
 bitwarden_aws_keypair() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(upkg root "${BASH_SOURCE[0]}")
-  (cd "$pkgroot" && UPKG_SILENT=true upkg install)
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Output AWS credentials stored in Bitwarden
