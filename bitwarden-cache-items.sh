@@ -46,8 +46,6 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}__quiet" \
   eval "$(docopt "$@")"
 
   checkdeps bw socket-credential-cache
-    # shellcheck disable=2154
-  ! $__quiet || BW_CACHE_ITEMS_PROGRESS=false
   local name cache_name
   if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
     __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
@@ -55,7 +53,10 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}__quiet" \
   local progress=0
   for name in "${ITEMNAME[@]}"; do
     # shellcheck disable=2154
-    progress '%d/%d "%s"' "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
+    if ! $__quiet; then
+      [[ ! -t 2 || $progress -eq 0 ]] || printf "\e[1A\r\e[K" >&2
+      printf 'bitwarden-cache-items: %d/%d "%s"\n'  "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
+    fi
     cache_name="Bitwarden $name"
     # shellcheck disable=2154
     if ! socket-credential-cache get "$cache_name" >/dev/null 2>&1; then
@@ -68,17 +69,9 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}__quiet" \
       "$pkgroot/bitwarden-fields.sh" --cache-for="$__cache_for" "$name" >/dev/null
     fi
   done
-  progress '%d/%d All items cached' "$progress" "${#ITEMNAME[@]}" >&2
-}
-
-progress() {
-  ${BW_CACHE_ITEMS_PROGRESS:-true} || return 0
-  local tpl=$1; shift
-  # shellcheck disable=2059
-  if [[ -t 2 ]]; then
-    printf "\e[1A\r\e[Kbitwarden-cache-items: $tpl\n" "$@" >&2
-  else
-    printf "bitwarden-cache-items: $tpl\n" "$@" >&2
+  if ! $__quiet; then
+    [[ ! -t 2 ]] || printf "\e[1A\r\e[K" >&2
+    printf "bitwarden-cache-items: %d/%d All items cached\n" "$progress" "${#ITEMNAME[@]}" >&2
   fi
 }
 
