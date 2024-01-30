@@ -2,7 +2,7 @@
 
 bitwarden_cache_items() {
   set -eo pipefail; shopt -s inherit_errexit
-  local pkgroot; pkgroot=$(upkg root "${BASH_SOURCE[0]}")
+  local pkgroot; pkgroot=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
   source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
   source "$pkgroot/.upkg/orbit-online/collections.sh/collections.sh"
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
