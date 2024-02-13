@@ -13,7 +13,7 @@ Options:
   -p --purpose PURPOSE  Specify why the master password is required.
                         The text will be appended to
                         'Enter your Bitwarden Master Password to ...'
-                        [default: retrieve \"\$FIELD\" from \"\$ITEM\"]
+                        [default: retrieve FIELD from ITEM]
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-value.sh`
 # shellcheck disable=2016,1090,1091,2034
@@ -37,7 +37,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose" \
   DOCOPT_OPTIONS_FIRST=true
   eval "$(docopt "$@")"
   checkdeps jq
-  if [[ $__purpose = "retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"" ]]; then
+  if [[ $__purpose = "retrieve FIELD from ITEM" ]]; then
     __purpose="retrieve \"$FIELD\" from \"$ITEM\""
   fi
   "$pkgroot/bitwarden-fields.sh" --purpose "$__purpose" --json "$ITEM" "$FIELD" | jq -re --arg field "$FIELD" '.[$field]'
