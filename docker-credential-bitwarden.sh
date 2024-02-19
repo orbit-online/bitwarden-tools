@@ -66,7 +66,7 @@ creds_cache() {
     bw_acquire_lock "$CACHE_NAME"
     # Check again, the line above is a race condition
     if ! socket-credential-cache get "$CACHE_NAME" 2>/dev/null; then
-      unlock_bw "retrieve all container registry credentials"
+      unlock_bw "retrieve all container registry credentials" || return $?
       local credentials
       credentials=$(bw --nointeraction list items --search "Container Registry - ")
       socket-credential-cache set --timeout $CACHE_FOR "$CACHE_NAME" <<<"$credentials"
@@ -153,7 +153,7 @@ unlock_bw() {
   local purpose=$1
   if [[ -z $BW_SESSION ]]; then
     export BW_SESSION
-    BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$purpose")
+    BW_SESSION=$("$pkgroot/bitwarden-unlock.sh" --purpose "$purpose") || return $?
     # shellcheck disable=2064
     trap "BW_SESSION=\"$BW_SESSION\" bw --nointeraction lock >/dev/null" EXIT
   fi
