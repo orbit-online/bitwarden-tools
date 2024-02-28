@@ -45,8 +45,8 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}__quiet" \
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-cache-items.sh`
   eval "$(docopt "$@")"
 
-  checkdeps bw socket-credential-cache
-  local name cache_name
+  checkdeps bw
+  local name
   if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
     __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
   fi
@@ -57,9 +57,8 @@ declare -p "${prefix}__cache_for" "${prefix}__purpose" "${prefix}__quiet" \
       [[ ! -t 2 || $progress -eq 0 ]] || printf "\e[1A\r\e[K" >&2
       printf 'bitwarden-cache-items: %d/%d "%s"\n'  "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
     fi
-    cache_name="Bitwarden $name"
     # shellcheck disable=2154
-    if ! socket-credential-cache get "$cache_name" >/dev/null 2>&1; then
+    if ! "$pkgroot/bitwarden-fields.sh" -m cache "$name" >/dev/null 2>&1; then
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
         # shellcheck disable=2154
