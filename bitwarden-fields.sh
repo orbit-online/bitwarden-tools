@@ -98,9 +98,9 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" "${prefix}_e" \
           exit_fatal 2 "Unlocking bitwarden failed"
         fi
         # shellcheck disable=2064
-        trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock </dev/null >/dev/null" EXIT
+        trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
       fi
-      if ! data=$(bw --nointeraction --raw get item "$ITEMNAME" </dev/null); then
+      if ! data=$(bw --nointeraction --raw get item "$ITEMNAME"); then
         printf "\n" >&2
         exit_fatal 3 "Unable to retrieve '%s'" "$ITEMNAME"
       fi
@@ -110,7 +110,7 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__json" "${prefix}_e" \
       local attachment_path
       for attachment_id in $(jq -r '(.attachments // [])[].id' <<<"$data"); do
         attachment_path=$(mktemp)
-        bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path" </dev/null
+        bw --nointeraction --quiet get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"
         data=$(
           jq --arg id "$attachment_id" '.attachments[(.attachments | map(.id == $id) | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
           <<<"$data"
