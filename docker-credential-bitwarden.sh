@@ -103,7 +103,7 @@ creds_store() {
   local item_name credentials bw_item_id
   item_name="Container Registry - $registry"
   unlock_bw "store credentials for \"$item_name\""
-  if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
+  if bw_item_id="$(bw --nointeraction get item "$item_name" | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
   printf '{
@@ -134,7 +134,7 @@ creds_erase() {
   fi
   local item_name="Container Registry - $registry"
   unlock_bw "remove credentials for \"$item_name\""
-  if bw_item_id="$(bw --nointeraction get item "$item_name" 2>/dev/null | jq -re .id)"; then
+  if bw_item_id="$(bw --nointeraction get item "$item_name" | jq -re .id)"; then
     bw --nointeraction --quiet delete item "$bw_item_id"
   fi
   socket-credential-cache clear "$CACHE_NAME"

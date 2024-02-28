@@ -52,7 +52,7 @@ declare -p "${prefix}__debug" "${prefix}__purpose"; done; }
     if ((tries >= 3)); then
       fatal "Unlocking Bitwarden failed"
     elif pass=$(pinentry-wrapper --desc "$desc" --ok Unlock --cancel Abort "${errarg[@]}" 'Unlock Bitwarden'); then
-      if session_key=$(bw unlock --raw <<<"$pass" 2>/dev/null); then
+      if session_key=$(bw unlock --raw <<<"$pass"); then
         printf "%s\n" "$session_key"
         return 0
       else

@@ -14,3 +14,7 @@ bw_acquire_lock() {
 bw_release_lock() {
   ! { : >&9; } 2>/dev/null || exec 9>&-
 }
+
+bw() {
+  command bw "$@" 2> >(LOGPROGRAM=bw tee_debug)
+}

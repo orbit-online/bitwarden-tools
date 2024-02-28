@@ -113,7 +113,6 @@ for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose" \
         trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
       fi
       if ! data=$(bw --nointeraction --raw get item "$ITEMNAME"); then
-        printf "\n" >&2
         exit_fatal 3 "Unable to retrieve '%s'" "$ITEMNAME"
       fi
       local item_id
