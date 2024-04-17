@@ -6,7 +6,9 @@
     "bitwarden-ssh-askpass": "bitwarden-ssh-askpass.sh",
     "bitwarden-unlock": "bitwarden-unlock.sh",
     "bitwarden-value": "bitwarden-value.sh",
-    "docker-credential-bitwarden": "docker-credential-bitwarden.sh"
+    "docker-credential-bitwarden": "docker-credential-bitwarden.sh",
+    "bitwarden-k8s-cert": "bitwarden-k8s-cert.sh",
+    "bitwarden-k8s-oidc": "bitwarden-k8s-oidc.sh"
   },
   "assets": ["common.sh"],
   "dependencies": {
