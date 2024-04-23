@@ -1,22 +1,11 @@
 {
-  "commands": {
-    "bitwarden-aws-keypair": "bitwarden-aws-keypair.sh",
-    "bitwarden-cache-items": "bitwarden-cache-items.sh",
-    "bitwarden-fields": "bitwarden-fields.sh",
-    "bitwarden-ssh-askpass": "bitwarden-ssh-askpass.sh",
-    "bitwarden-unlock": "bitwarden-unlock.sh",
-    "bitwarden-value": "bitwarden-value.sh",
-    "docker-credential-bitwarden": "docker-credential-bitwarden.sh",
-    "bitwarden-k8s-cert": "bitwarden-k8s-cert.sh",
-    "bitwarden-k8s-oidc": "bitwarden-k8s-oidc.sh"
-  },
-  "assets": ["common.sh"],
+  "name": "bitwarden-tools",
   "dependencies": {
-    "orbit-online/records.sh": "v0.9.5",
-    "orbit-online/pinentry-wrapper": "v0.10.4",
-    "orbit-online/checkdeps": "v1.0.2",
-    "andsens/docopt.sh": "v1.0.0-upkg",
-    "orbit-online/collections.sh": "v0.0.1",
-    "orbit-online/path-tools": "v0.2.1"
+    "git@github.com:orbit-online/records.sh": "493ebb2c7c52dcf8f83a6fcaae6c7cbcfb2be736",
+    "git@github.com:orbit-online/pinentry-wrapper": "7d831c4fff76b41727fa0601f27334334c4cdf91",
+    "git@github.com:orbit-online/checkdeps": "bad478ffff7beb2e54b58fec7cc908fb8b4e8751",
+    "git@github.com:andsens/docopt.sh#name=docopt.sh": "0447a7834ecb5120c112456d961f7fdb23e7bdef",
+    "git@github.com:orbit-online/collections.sh": "b23ba2baf16ea6cdf5dfad176c4440eb8736dad4",
+    "git@github.com:orbit-online/path-tools": "f8154fb7846f892127c18e28afab4c82058bca14"
   }
 }

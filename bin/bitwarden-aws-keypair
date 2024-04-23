@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# shellcheck source-path=..
 
 bitwarden_aws_keypair() {
   set -eo pipefail; shopt -s inherit_errexit
-  local pkgroot; pkgroot=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Output AWS credentials stored in Bitwarden
@@ -20,7 +21,7 @@ Notes:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-aws-keypair.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || {
+docopt() { source "$pkgroot/.upkg/docopt.sh/docopt-lib.sh" '1.0.0' || {
 ret=$?; printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e
 trimmed_doc=${DOC:0:395}; usage=${DOC:43:49}; digest=5bd15; shorts=(-e '')
 longs=(--env --cache-for); argcounts=(0 1); node_0(){ switch __env 0; }
@@ -35,7 +36,7 @@ eval "${prefix}"'__cache_for=${var___cache_for:-0}'
 eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'; local docopt_i=1
 [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2; for ((;docopt_i>0;docopt_i--)); do
 declare -p "${prefix}__env" "${prefix}__cache_for" "${prefix}ITEMNAME"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-aws-keypair.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt.sh/docopt-lib.sh"' bitwarden-aws-keypair.sh`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE

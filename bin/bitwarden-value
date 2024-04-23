@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# shellcheck source-path=..
 
 bitwarden_value() {
   set -eo pipefail; shopt -s inherit_errexit
-  local pkgroot; pkgroot=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Retrieve a single field value from Bitwarden and output it verbatim
@@ -19,7 +20,7 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-value.sh`
 # shellcheck disable=2016,1090,1091,2034
-docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || {
+docopt() { source "$pkgroot/.upkg/docopt.sh/docopt-lib.sh" '1.0.0' || {
 ret=$?; printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e
 trimmed_doc=${DOC:0:533}; usage=${DOC:68:45}; digest=8f886; shorts=(-m -p '')
 longs=(--mechanism --purpose --cache-for); argcounts=(1 1 1); node_0(){
@@ -39,7 +40,7 @@ local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__mechanism" \
 "${prefix}__purpose" "${prefix}__cache_for" "${prefix}ITEM" "${prefix}FIELD"
 done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-value.sh`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt.sh/docopt-lib.sh"' bitwarden-value.sh`
   # shellcheck disable=2034
   DOCOPT_OPTIONS_FIRST=true
   eval "$(docopt "$@")"
