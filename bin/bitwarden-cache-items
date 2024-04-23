@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# shellcheck source-path=..
+
+bitwarden_cache_items() {
+  set -eo pipefail; shopt -s inherit_errexit
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  source "$pkgroot/.upkg/records.sh/records.sh"
+  source "$pkgroot/.upkg/collections.sh/collections.sh"
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
+
+  DOC="Cache Bitwarden multiple items in the socket-credential-cache
+Usage:
+  bitwarden-cache-items [options] ITEMNAME...
+
+Options:
+  --cache-for=SECONDS   Cache item for retrieval without a session [default: 0]
+  -p --purpose PURPOSE  Specify why the master password is required.
+                        The text will be appended to
+                        'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve the items \"\$ITEMNAME\"...]
+  --check               Only check whether items are cached, return 1 otherwise
+  -q --quiet            Don't print progress
+"
+# docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items`
+# shellcheck disable=2016,2086,2317,1090,1091,2034,2154
+docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
+ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
+trimmed_doc=${DOC:0:590};usage=${DOC:62:52};digest=ca6ed;options=(' --cache-fo'\
+'r 1' '-p --purpose 1' ' --check 0' '-q --quiet 0');node_0(){ value \
+__cache_for 0;};node_1(){ value __purpose 1;};node_2(){ switch __check 2;}
+node_3(){ switch __quiet 3;};node_4(){ value ITEMNAME a true;};node_5(){
+optional 0 1 2 3;};node_6(){ repeatable 4;};node_7(){ sequence 5 6;};cat <<<' \
+docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
+"${DOC:62:52}" >&2;exit 1;}';local varnames=(__cache_for __purpose __check \
+__quiet ITEMNAME) varname;for varname in "${varnames[@]}"; do unset \
+"var_$varname";done;parse 7 "$@";local p=${DOCOPT_PREFIX:-''};for varname in \
+"${varnames[@]}"; do unset "$p$varname";done;if declare -p var_ITEMNAME \
+>/dev/null 2>&1; then eval $p'ITEMNAME=("${var_ITEMNAME[@]}")';else eval $p'IT'\
+'EMNAME=()';fi;eval $p'__cache_for=${var___cache_for:-0};'$p'__purpose=${var__'\
+'_purpose:-'"'"'retrieve the items "$ITEMNAME"...'"'"'};'$p'__check=${var___ch'\
+'eck:-false};'$p'__quiet=${var___quiet:-false};';local docopt_i=1;[[ \
+$BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for \
+varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-cache-items`
+  eval "$(docopt "$@")"
+
+  checkdeps bw
+  local name
+  if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
+    __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
+  fi
+  local progress=0
+  for name in "${ITEMNAME[@]}"; do
+    # shellcheck disable=2154
+    if ! $__quiet; then
+      [[ ! -t 2 || $progress -eq 0 ]] || printf "\e[1A\r\e[K" >&2
+      printf 'bitwarden-cache-items: %d/%d "%s"\n'  "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
+    fi
+    # shellcheck disable=2154
+    if ! "$pkgroot/bitwarden-fields.sh" -m cache "$name" >/dev/null 2>&1; then
+      ! $__check || return 1
+      if [[ -z $BW_SESSION ]]; then
+        export BW_SESSION
+        # shellcheck disable=2154
+        BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
+        trap "bw lock >/dev/null" EXIT
+      fi
+      "$pkgroot/bitwarden-fields.sh" --cache-for="$__cache_for" "$name" >/dev/null
+    fi
+  done
+  if ! $__quiet; then
+    [[ ! -t 2 ]] || printf "\e[1A\r\e[K" >&2
+    printf "bitwarden-cache-items: %d/%d All items cached\n" "$progress" "${#ITEMNAME[@]}" >&2
+  fi
+}
+
+bitwarden_cache_items "$@"

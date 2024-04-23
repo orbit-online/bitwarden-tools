@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck source-path=..
 
 # Exit codes
 # 1: Internal error
@@ -8,9 +9,9 @@
 
 bitwarden_fields() {
   set -eo pipefail; shopt -s inherit_errexit
-  local pkgroot; pkgroot=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-  source "$pkgroot/.upkg/orbit-online/records.sh/records.sh"
-  source "$pkgroot/.upkg/orbit-online/collections.sh/collections.sh"
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  source "$pkgroot/.upkg/records.sh/records.sh"
+  source "$pkgroot/.upkg/collections.sh/collections.sh"
   source "$pkgroot/common.sh"
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
@@ -34,48 +35,34 @@ Note:
   For attachment IDs use \`attachmentid:\`
   To retrieve all fields, omit the FIELD argument entirely
 "
-# docopt parser below, refresh this parser with `docopt.sh bitwarden-fields.sh`
-# shellcheck disable=2016,1090,1091,2034,2154
-docopt() { source "$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh" '1.0.0' || {
-ret=$?; printf -- "exit %d\n" "$ret"; exit "$ret"; }; set -e
-trimmed_doc=${DOC:0:933}; usage=${DOC:47:55}; digest=9e0b5
-shorts=(-p '' '' -j '' -m -e)
-longs=(--purpose --prefix --cache-for --json --debug --mechanism '')
-argcounts=(1 1 1 0 0 1 0); node_0(){ value __purpose 0; }; node_1(){
-value __prefix 1; }; node_2(){ value __cache_for 2; }; node_3(){ switch __json 3
-}; node_4(){ switch __debug 4; }; node_5(){ value __mechanism 5; }; node_6(){
-switch _e 6; }; node_7(){ value ITEMNAME a; }; node_8(){ value FIELD a true; }
-node_9(){ optional 0 1 2 3 4 5 6; }; node_10(){ optional 9; }; node_11(){
-oneormore 8; }; node_12(){ optional 11; }; node_13(){ required 10 7 12; }
-node_14(){ required 13; }; cat <<<' docopt_exit() {
-[[ -n $1 ]] && printf "%s\n" "$1" >&2; printf "%s\n" "${DOC:47:55}" >&2; exit 1
-}'; unset var___purpose var___prefix var___cache_for var___json var___debug \
-var___mechanism var__e var_ITEMNAME var_FIELD; parse 14 "$@"
-local prefix=${DOCOPT_PREFIX:-''}; unset "${prefix}__purpose" \
-"${prefix}__prefix" "${prefix}__cache_for" "${prefix}__json" \
-"${prefix}__debug" "${prefix}__mechanism" "${prefix}_e" "${prefix}ITEMNAME" \
-"${prefix}FIELD"
-eval "${prefix}"'__purpose=${var___purpose:-'"'"'retrieve "$ITEMNAME"'"'"'}'
-eval "${prefix}"'__prefix=${var___prefix:-}'
-eval "${prefix}"'__cache_for=${var___cache_for:-0}'
-eval "${prefix}"'__json=${var___json:-false}'
-eval "${prefix}"'__debug=${var___debug:-false}'
-eval "${prefix}"'__mechanism=${var___mechanism:-both}'
-eval "${prefix}"'_e=${var__e:-false}'
-eval "${prefix}"'ITEMNAME=${var_ITEMNAME:-}'
-if declare -p var_FIELD >/dev/null 2>&1; then
-eval "${prefix}"'FIELD=("${var_FIELD[@]}")'; else eval "${prefix}"'FIELD=()'; fi
-local docopt_i=1; [[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
-for ((;docopt_i>0;docopt_i--)); do declare -p "${prefix}__purpose" \
-"${prefix}__prefix" "${prefix}__cache_for" "${prefix}__json" \
-"${prefix}__debug" "${prefix}__mechanism" "${prefix}_e" "${prefix}ITEMNAME" \
-"${prefix}FIELD"; done; }
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/andsens/docopt.sh/docopt-lib.sh"' bitwarden-fields.sh`
-
-  checkdeps bw jq # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
-
+# docopt parser below, refresh this parser with `docopt.sh bitwarden-fields`
+# shellcheck disable=2016,2086,2317,1090,1091,2034,2154
+docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
+ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
+trimmed_doc=${DOC:0:933};usage=${DOC:47:55};digest=9e0b5;options=('-p --purpos'\
+'e 1' '-m --mechanism 1' ' --cache-for 1' '-j --json 0' ' --prefix 1' '-e  0' \
+' --debug 0');node_0(){ value __purpose 0;};node_1(){ value __mechanism 1;}
+node_2(){ value __cache_for 2;};node_3(){ switch __json 3;};node_4(){ value \
+__prefix 4;};node_5(){ switch _e 5;};node_6(){ switch __debug 6;};node_7(){
+value ITEMNAME a;};node_8(){ value FIELD a true;};node_9(){ optional 0 1 2 3 4 \
+5 6;};node_10(){ optional 11;};node_11(){ repeatable 8;};node_12(){ sequence 9 \
+7 10;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf \
+"%s\n" "${DOC:47:55}" >&2;exit 1;}';local varnames=(__purpose __mechanism \
+__cache_for __json __prefix _e __debug ITEMNAME FIELD) varname;for varname in \
+"${varnames[@]}"; do unset "var_$varname";done;parse 12 "$@";local \
+p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
+done;if declare -p var_FIELD >/dev/null 2>&1; then eval $p'FIELD=("${var_FIELD'\
+'[@]}")';else eval $p'FIELD=()';fi;eval $p'__purpose=${var___purpose:-'"'"'\
+retrieve "$ITEMNAME"'"'"'};'$p'__mechanism=${var___mechanism:-both};'$p'__cach'\
+'e_for=${var___cache_for:-0};'$p'__json=${var___json:-false};'$p'__prefix=${va'\
+'r___prefix:-};'$p'_e=${var__e:-false};'$p'__debug=${var___debug:-false};'$p'I'\
+'TEMNAME=${var_ITEMNAME:-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && \
+docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; \
+do declare -p "$p$varname";done;done;}
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-fields`
   eval "$(docopt "$@")"
 
+  checkdeps bw jq # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
   # shellcheck disable=2154
   if ! contains_element "$__mechanism" bw cache both; then
     docopt_exit "--mechanism must be \"bw\", \"cache\", or \"both\". Got \"$__mechanism\"."

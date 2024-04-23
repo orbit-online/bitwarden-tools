@@ -4,11 +4,7 @@ Tools that help you integrate the bitwarden CLI into your scripts.
 
 ## Installation
 
-With [μpkg](https://github.com/orbit-online/upkg)
-
-```
-upkg install -g orbit-online/bitwarden-tools@<VERSION>
-```
+See [the latest release](https://github.com/orbit-online/bitwarden-tools/releases/latest) for instructions.
 
 Requires [socket-credential-cache](https://github.com/orbit-online/socket-credential-cache)
 to be set up.

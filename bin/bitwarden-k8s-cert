@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# shellcheck source-path=..
+
+k8s_cert() {
+  set -eo pipefail; shopt -s inherit_errexit
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  (cd "$pkgroot" && UPKG_SILENT=true upkg install)
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
+
+  DOC="Output client cert credentials for a cluster
+Usage:
+  bitwarden-k8s-cert [options] ITEMNAME
+
+Options:
+  --cache-for=SECONDS   Cache item with socket-credential-cache [default: 0]
+"
+# docopt parser below, refresh this parser with `docopt.sh bitwarden-k8s-cert`
+# shellcheck disable=2016,2086,2317,1090,1091,2034
+docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
+ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
+trimmed_doc=${DOC:0:178};usage=${DOC:45:46};digest=1b1ff;options=(' --cache-fo'\
+'r 1');node_0(){ value __cache_for 0;};node_1(){ value ITEMNAME a;};node_2(){
+optional 0;};node_3(){ sequence 2 1;};cat <<<' docopt_exit() { [[ -n $1 ]] && \
+printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:45:46}" >&2;exit 1;}';local \
+varnames=(__cache_for ITEMNAME) varname;for varname in "${varnames[@]}"; do
+unset "var_$varname";done;parse 3 "$@";local p=${DOCOPT_PREFIX:-''};for \
+varname in "${varnames[@]}"; do unset "$p$varname";done;eval $p'__cache_for=${'\
+'var___cache_for:-0};'$p'ITEMNAME=${var_ITEMNAME:-};';local docopt_i=1;[[ \
+$BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for \
+varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-k8s-cert`
+  eval "$(docopt "$@")"
+  # shellcheck disable=2154
+  eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for="$__cache_for" "$ITEMNAME" attachment:tls.crt attachment:tls.key)"
+  # shellcheck disable=2154
+  printf '{
+  "apiVersion": "client.authentication.k8s.io/v1beta1",
+  "kind": "ExecCredential",
+  "status": {
+    "clientCertificateData": "%s",
+    "clientKeyData": "%s"
+  }
+}\n' "${tls_crt//$'\n'/\\n}" "${tls_key//$'\n'/\\n}"
+}
+
+k8s_cert "$@"

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# shellcheck source-path=..
+
+bitwarden_ssh_askpass() {
+  set -eo pipefail; shopt -s inherit_errexit
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
+
+  DOC="Retrieve a single field value from Bitwarden and output it verbatim
+Usage:
+  bitwarden-ssh-askpass [options] [[--] ANYARGS...]
+
+Options:
+  -p --purpose PURPOSE  Specify why the master password is required.
+                        The text will be appended to
+                        'Enter your Bitwarden Master Password to ...'
+                        [default: retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"]
+  --item ITEM    The name of the Bitwarden item [default: \$BW_ITEM]
+  --field FIELD  The name of the field on the item [default: \$BW_FIELD]
+
+Note:
+  You can specify both parameters through environment variables. This allows
+  bitwarden-ssh-askpass to be used as an SSH askpass program. e.g.:
+  env DISPLAY=':0.0' SSH_ASKPASS='bitwarden-ssh-askpass' \\
+    BW_SESSION='...' BW_ITEM='SSH Key' BW_FIELD='passphrase' ssh ...
+  Any arguments are ignored
+"
+# docopt parser below, refresh this parser with `docopt.sh bitwarden-ssh-askpass`
+# shellcheck disable=2016,2086,2317,1090,1091,2034,2154
+docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
+ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
+trimmed_doc=${DOC:0:848};usage=${DOC:68:58};digest=4b570;options=('-p --purpos'\
+'e 1' ' --item 1' ' --field 1');node_0(){ value __purpose 0;};node_1(){ value \
+__item 1;};node_2(){ value __field 2;};node_3(){ value ANYARGS a true;}
+node_4(){ switch __ a:--;};node_5(){ optional 0 1 2;};node_6(){ optional 4 7;}
+node_7(){ repeatable 3;};node_8(){ sequence 5 6;};cat <<<' docopt_exit() { [[ \
+-n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:68:58}" >&2;exit 1;}'
+local varnames=(__purpose __item __field ANYARGS __) varname;for varname in \
+"${varnames[@]}"; do unset "var_$varname";done;parse 8 "$@";local \
+p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
+done;if declare -p var_ANYARGS >/dev/null 2>&1; then eval $p'ANYARGS=("${var_A'\
+'NYARGS[@]}")';else eval $p'ANYARGS=()';fi;eval $p'__purpose=${var___purpose:-'\
+"'"'retrieve "$BW_FIELD" from "$BW_ITEM"'"'"'};'$p'__item=${var___item:-'"'"'\
+$BW_ITEM'"'"'};'$p'__field=${var___field:-'"'"'$BW_FIELD'"'"'};'$p'__=${var___'\
+':-false};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
+((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
+"$p$varname";done;done;}
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-ssh-askpass`
+  # shellcheck disable=2034
+  DOCOPT_OPTIONS_FIRST=true
+  eval "$(docopt "$@")"
+  [[ $__item != "\$BW_ITEM" ]] || __item="$BW_ITEM"
+  [[ $__field != "\$BW_FIELD" ]] || __field="$BW_FIELD"
+  if [[ $__purpose = "retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"" ]]; then
+    __purpose="retrieve \"$__field\" from \"$__item\""
+  fi
+  "$pkgroot/bitwarden-value.sh" --purpose "$__purpose" "$__item" "$__field"
+}
+
+bitwarden_ssh_askpass "$@"
