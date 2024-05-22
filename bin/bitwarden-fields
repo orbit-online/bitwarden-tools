@@ -10,8 +10,6 @@
 bitwarden_fields() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
-  source "$pkgroot/.upkg/records.sh/records.sh"
-  source "$pkgroot/.upkg/collections.sh/collections.sh"
   source "$pkgroot/common.sh"
   PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 

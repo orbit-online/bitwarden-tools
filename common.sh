@@ -2,6 +2,11 @@
 
 LOCKDIR="/var/run/lock/bitwarden-tools"
 
+# shellcheck disable=SC1091
+source "${pkgroot:?}/.upkg/records.sh/records.sh"
+# shellcheck disable=SC1091
+source "${pkgroot:?}/.upkg/collections.sh/collections.sh"
+
 bw_acquire_lock() {
   [[ -d "$LOCKDIR" ]] || mkdir "$LOCKDIR"
   local lockpath="$LOCKDIR/${1//[^A-Za-z0-9_]/_}.lock"

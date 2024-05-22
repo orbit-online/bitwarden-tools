@@ -12,14 +12,14 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - uses: orbit-online/upkg-install@v1
-      with:
-        install-dependencies: 'true'
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
       env:
         SHELLCHECK_OPTS: -x
       with:
         ignore_paths: .upkg
+    - uses: orbit-online/upkg-install@v1
+      with:
+        install-dependencies: 'true'
     - name: Show --help menus
       run: for cmd in bin/*; do "$cmd" --help; done
