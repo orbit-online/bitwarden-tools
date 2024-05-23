@@ -19,7 +19,5 @@ jobs:
       with:
         ignore_paths: .upkg
     - uses: orbit-online/upkg-install@v1
-      with:
-        install-dependencies: 'true'
     - name: Show --help menus
       run: for cmd in bin/*; do "$cmd" --help; done

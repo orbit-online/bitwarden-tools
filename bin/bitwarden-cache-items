@@ -56,7 +56,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
       printf 'bitwarden-cache-items: %d/%d "%s"\n'  "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
     fi
     # shellcheck disable=2154
-    if ! "$pkgroot/bitwarden-fields.sh" -m cache "$name" >/dev/null 2>&1; then
+    if ! "$pkgroot/bin/bitwarden-fields" -m cache "$name" >/dev/null 2>&1; then
       ! $__check || return 1
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
@@ -64,7 +64,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
         BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
         trap "bw lock >/dev/null" EXIT
       fi
-      "$pkgroot/bitwarden-fields.sh" --cache-for="$__cache_for" "$name" >/dev/null
+      "$pkgroot/bin/bitwarden-fields" --cache-for="$__cache_for" "$name" >/dev/null
     fi
   done
   if ! $__quiet; then

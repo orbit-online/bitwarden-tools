@@ -31,7 +31,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-k8s-cert`
   eval "$(docopt "$@")"
   # shellcheck disable=2154
-  eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for="$__cache_for" "$ITEMNAME" attachment:tls.crt attachment:tls.key)"
+  eval "$("$pkgroot/bin/bitwarden-fields" -e --cache-for="$__cache_for" "$ITEMNAME" attachment:tls.crt attachment:tls.key)"
   # shellcheck disable=2154
   printf '{
   "apiVersion": "client.authentication.k8s.io/v1beta1",

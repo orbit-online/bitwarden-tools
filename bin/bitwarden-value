@@ -45,7 +45,7 @@ do declare -p "$p$varname";done;done;}
     __purpose="retrieve \"$FIELD\" from \"$ITEM\""
   fi
   # shellcheck disable=2154
-  "$pkgroot/bitwarden-fields.sh" \
+  "$pkgroot/bin/bitwarden-fields" \
     --mechanism "$__mechanism" --cache-for "$__cache_for" --purpose "$__purpose" --json \
     "$ITEM" "$FIELD" | \
     jq -re --arg field "$FIELD" '.[$field]'

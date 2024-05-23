@@ -31,7 +31,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-k8s-oidc`
   eval "$(docopt "$@")"
   # shellcheck disable=2154
-  eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for="$__cache_for" "$ITEMNAME" oidc-issuer-url oidc-client-id oidc-client-secret)"
+  eval "$("$pkgroot/bin/bitwarden-fields" -e --cache-for="$__cache_for" "$ITEMNAME" oidc-issuer-url oidc-client-id oidc-client-secret)"
   # shellcheck disable=2154
   kubectl \
     oidc-login \

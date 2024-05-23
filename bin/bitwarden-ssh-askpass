@@ -54,7 +54,7 @@ $BW_ITEM'"'"'};'$p'__field=${var___field:-'"'"'$BW_FIELD'"'"'};'$p'__=${var___'\
   if [[ $__purpose = "retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"" ]]; then
     __purpose="retrieve \"$__field\" from \"$__item\""
   fi
-  "$pkgroot/bitwarden-value.sh" --purpose "$__purpose" "$__item" "$__field"
+  "$pkgroot/bin/bitwarden-value" --purpose "$__purpose" "$__item" "$__field"
 }
 
 bitwarden_ssh_askpass "$@"

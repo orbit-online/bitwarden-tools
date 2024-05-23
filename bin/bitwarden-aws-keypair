@@ -40,7 +40,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
     FILE=$HOME/$FILE
   fi
   # shellcheck disable=2154
-  eval "$("$pkgroot/bitwarden-fields.sh" -e --cache-for="$__cache_for" "$ITEMNAME" AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY)"
+  eval "$("$pkgroot/bin/bitwarden-fields" -e --cache-for="$__cache_for" "$ITEMNAME" AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY)"
   # shellcheck disable=2154
   if $__env; then
     printf 'export AWS_ACCESS_KEY_ID="%s"\nexport AWS_SECRET_ACCESS_KEY="%s"\n' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
