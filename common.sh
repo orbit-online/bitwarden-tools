@@ -21,5 +21,5 @@ bw_release_lock() {
 }
 
 bw() {
-  command bw "$@" 2> >(LOGPROGRAM=bw tee_debug)
+  command bw "$@" 2> >(LOGPROGRAM=bw pipe_debug)
 }
