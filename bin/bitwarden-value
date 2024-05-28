@@ -44,11 +44,14 @@ do declare -p "$p$varname";done;done;}
   if [[ $__purpose = "retrieve FIELD from ITEM" ]]; then
     __purpose="retrieve \"$FIELD\" from \"$ITEM\""
   fi
+  local json_field=$FIELD
+  json_field=${json_field#attachment:}
+  json_field=${json_field#attachmentid:}
   # shellcheck disable=2154
   "$pkgroot/bin/bitwarden-fields" \
     --mechanism "$__mechanism" --cache-for "$__cache_for" --purpose "$__purpose" --json \
     "$ITEM" "$FIELD" | \
-    jq -re --arg field "$FIELD" '.[$field]'
+    jq -re --arg field "$json_field" '.[$field]'
 }
 
 bitwarden_value "$@"
