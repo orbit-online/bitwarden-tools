@@ -87,7 +87,7 @@ do declare -p "$p$varname";done;done;}
     if [[ $__mechanism = bw ]] || ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
       data_from_cache=false
       if [[ -z $BW_SESSION ]]; then
-        if [[ $__purpose = "retrieve \"\$ITEMNAME\"" ]]; then
+        if [[ $__purpose = $'\\\nretrieve "$ITEMNAME"' ]]; then
           __purpose="retrieve \"$ITEMNAME\""
         fi
         export BW_SESSION
