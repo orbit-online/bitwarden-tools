@@ -78,7 +78,12 @@ do declare -p "$p$varname";done;done;}
     exit_fatal() { fatal "$@"; }
   fi
 
-  # shellcheck disable=2153
+  # shellcheck disable=2154
+  if { [[ $__mechanism = cache ]] || [[ $__cache_for -gt 0 ]]; } && ! type socket-credential-cache >/dev/null 2>&1; then
+    warning "socket-credential-cache is not installed, unable to get/set cache"
+    __cache_for=0
+  fi
+
   local data cache_name="Bitwarden $ITEMNAME" data_from_cache=true
   if [[ $__mechanism = bw ]] || ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
     [[ $__mechanism != cache ]] || exit_fatal 3 "Unable to retrieve '%s' from cache" "$ITEMNAME"
@@ -172,7 +177,7 @@ do declare -p "$p$varname";done;done;}
   if $__json; then
     printf "%s\n" "$json_out"
   fi
-  # shellcheck disable=2154
+
   if ! $data_from_cache && [[ $__cache_for -gt 0 ]]; then
     [[ $__mechanism != bw ]] || socket-credential-cache clear "$cache_name" <<<"$data"
     socket-credential-cache --timeout="$__cache_for" set "$cache_name" <<<"$data"
