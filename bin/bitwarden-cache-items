@@ -22,14 +22,14 @@ Options:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items`
 # shellcheck disable=2016,2086,2317,1090,1091,2034,2154
-docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
-ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
-trimmed_doc=${DOC:0:590};usage=${DOC:62:52};digest=ca6ed;options=(' --cache-fo'\
-'r 1' '-p --purpose 1' ' --check 0' '-q --quiet 0');node_0(){ value \
-__cache_for 0;};node_1(){ value __purpose 1;};node_2(){ switch __check 2;}
-node_3(){ switch __quiet 3;};node_4(){ value ITEMNAME a true;};node_5(){
-optional 0 1 2 3;};node_6(){ repeatable 4;};node_7(){ sequence 5 6;};cat <<<' \
-docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
+docopt() { local v='2.0.1'; source \
+"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:590};usage=${DOC:62:52}
+digest=ca6ed;options=(' --cache-for 1' '-p --purpose 1' ' --check 0' '-q --qui'\
+'et 0');node_0(){ value __cache_for 0;};node_1(){ value __purpose 1;};node_2(){
+switch __check 2;};node_3(){ switch __quiet 3;};node_4(){ value ITEMNAME a true
+};node_5(){ optional 0 1 2 3;};node_6(){ repeatable 4;};node_7(){ sequence 5 6;}
+cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
 "${DOC:62:52}" >&2;exit 1;}';local varnames=(__cache_for __purpose __check \
 __quiet ITEMNAME) varname;for varname in "${varnames[@]}"; do unset \
 "var_$varname";done;parse 7 "$@";local p=${DOCOPT_PREFIX:-''};for varname in \

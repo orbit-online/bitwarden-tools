@@ -35,28 +35,29 @@ Note:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-fields`
 # shellcheck disable=2016,2086,2317,1090,1091,2034,2154
-docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
-ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
-trimmed_doc=${DOC:0:933};usage=${DOC:47:55};digest=9e0b5;options=('-p --purpos'\
-'e 1' '-m --mechanism 1' ' --cache-for 1' '-j --json 0' ' --prefix 1' '-e  0' \
-' --debug 0');node_0(){ value __purpose 0;};node_1(){ value __mechanism 1;}
-node_2(){ value __cache_for 2;};node_3(){ switch __json 3;};node_4(){ value \
-__prefix 4;};node_5(){ switch _e 5;};node_6(){ switch __debug 6;};node_7(){
-value ITEMNAME a;};node_8(){ value FIELD a true;};node_9(){ optional 0 1 2 3 4 \
-5 6;};node_10(){ optional 11;};node_11(){ repeatable 8;};node_12(){ sequence 9 \
-7 10;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf \
-"%s\n" "${DOC:47:55}" >&2;exit 1;}';local varnames=(__purpose __mechanism \
-__cache_for __json __prefix _e __debug ITEMNAME FIELD) varname;for varname in \
-"${varnames[@]}"; do unset "var_$varname";done;parse 12 "$@";local \
-p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
-done;if declare -p var_FIELD >/dev/null 2>&1; then eval $p'FIELD=("${var_FIELD'\
-'[@]}")';else eval $p'FIELD=()';fi;eval $p'__purpose=${var___purpose:-'"'"'\
-retrieve "$ITEMNAME"'"'"'};'$p'__mechanism=${var___mechanism:-both};'$p'__cach'\
-'e_for=${var___cache_for:-0};'$p'__json=${var___json:-false};'$p'__prefix=${va'\
-'r___prefix:-};'$p'_e=${var__e:-false};'$p'__debug=${var___debug:-false};'$p'I'\
-'TEMNAME=${var_ITEMNAME:-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && \
-docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; \
-do declare -p "$p$varname";done;done;}
+docopt() { local v='2.0.1'; source \
+"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:933};usage=${DOC:47:55}
+digest=9e0b5;options=('-p --purpose 1' '-m --mechanism 1' ' --cache-for 1' '-j'\
+' --json 0' ' --prefix 1' '-e  0' ' --debug 0');node_0(){ value __purpose 0;}
+node_1(){ value __mechanism 1;};node_2(){ value __cache_for 2;};node_3(){
+switch __json 3;};node_4(){ value __prefix 4;};node_5(){ switch _e 5;};node_6(){
+switch __debug 6;};node_7(){ value ITEMNAME a;};node_8(){ value FIELD a true;}
+node_9(){ optional 0 1 2 3 4 5 6;};node_10(){ optional 11;};node_11(){
+repeatable 8;};node_12(){ sequence 9 7 10;};cat <<<' docopt_exit() { [[ -n $1 \
+]] && printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:47:55}" >&2;exit 1;}';local \
+varnames=(__purpose __mechanism __cache_for __json __prefix _e __debug \
+ITEMNAME FIELD) varname;for varname in "${varnames[@]}"; do unset "var_$varname"
+done;parse 12 "$@";local p=${DOCOPT_PREFIX:-''};for varname in \
+"${varnames[@]}"; do unset "$p$varname";done;if declare -p var_FIELD \
+>/dev/null 2>&1; then eval $p'FIELD=("${var_FIELD[@]}")';else eval $p'FIELD=()'
+fi;eval $p'__purpose=${var___purpose:-'"'"'retrieve "$ITEMNAME"'"'"'};'$p'__me'\
+'chanism=${var___mechanism:-both};'$p'__cache_for=${var___cache_for:-0};'$p'__'\
+'json=${var___json:-false};'$p'__prefix=${var___prefix:-};'$p'_e=${var__e:-fal'\
+'se};'$p'__debug=${var___debug:-false};'$p'ITEMNAME=${var_ITEMNAME:-};';local \
+docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
+((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
+"$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-fields`
   eval "$(docopt "$@")"
 

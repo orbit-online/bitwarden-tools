@@ -21,19 +21,20 @@ Notes:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-aws-keypair`
 # shellcheck disable=2016,2086,2317,1090,1091,2034
-docopt() { source "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" '2.0.0' || {
-ret=$?;printf -- "exit %d\n" "$ret";exit "$ret";};set -e
-trimmed_doc=${DOC:0:395};usage=${DOC:43:49};digest=5bd15;options=('-e --env 0' \
-' --cache-for 1');node_0(){ switch __env 0;};node_1(){ value __cache_for 1;}
-node_2(){ value ITEMNAME a;};node_3(){ optional 0 1;};node_4(){ sequence 3 2;}
-cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
-"${DOC:43:49}" >&2;exit 1;}';local varnames=(__env __cache_for ITEMNAME) varname
-for varname in "${varnames[@]}"; do unset "var_$varname";done;parse 4 "$@"
-local p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset \
-"$p$varname";done;eval $p'__env=${var___env:-false};'$p'__cache_for=${var___ca'\
-'che_for:-0};'$p'ITEMNAME=${var_ITEMNAME:-};';local docopt_i=1;[[ \
-$BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for \
-varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
+docopt() { local v='2.0.1'; source \
+"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:395};usage=${DOC:43:49}
+digest=5bd15;options=('-e --env 0' ' --cache-for 1');node_0(){ switch __env 0;}
+node_1(){ value __cache_for 1;};node_2(){ value ITEMNAME a;};node_3(){
+optional 0 1;};node_4(){ sequence 3 2;};cat <<<' docopt_exit() { [[ -n $1 ]] \
+&& printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:43:49}" >&2;exit 1;}';local \
+varnames=(__env __cache_for ITEMNAME) varname;for varname in "${varnames[@]}"; \
+do unset "var_$varname";done;parse 4 "$@";local p=${DOCOPT_PREFIX:-''};for \
+varname in "${varnames[@]}"; do unset "$p$varname";done;eval $p'__env=${var___'\
+'env:-false};'$p'__cache_for=${var___cache_for:-0};'$p'ITEMNAME=${var_ITEMNAME'\
+':-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
+((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
+"$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-aws-keypair`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
