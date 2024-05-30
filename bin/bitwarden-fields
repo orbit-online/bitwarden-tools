@@ -93,7 +93,7 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
     if [[ $__mechanism = bw ]] || ! data=$(socket-credential-cache get "$cache_name" 2>/dev/null); then
       data_from_cache=false
       if [[ -z $BW_SESSION ]]; then
-        if [[ $__purpose = $'\\\nretrieve "$ITEMNAME"' ]]; then
+        if [[ $__purpose = "retrieve \"\$ITEMNAME\"" ]]; then
           __purpose="retrieve \"$ITEMNAME\""
         fi
         export BW_SESSION
