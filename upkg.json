@@ -20,10 +20,6 @@
     {
       "tar": "https://github.com/orbit-online/pinentry-wrapper/releases/download/v1.0.1/pinentry-wrapper.tar.gz",
       "sha256": "78b0826abc0a66ebc9ad55591aa21694e3ad33d1622ab4d16b60f42d78e82750"
-    },
-    {
-      "tar": "https://github.com/orbit-online/path-tools/releases/download/v1.0.0/path-tools.tar.gz",
-      "sha256": "2ae2a98714aa81e2142b749dac9ecdb61e050e66bf8bd33aef0fccb2ce66c84b"
     }
   ]
 }

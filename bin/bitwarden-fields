@@ -11,7 +11,6 @@ bitwarden_fields() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
   source "$pkgroot/common.sh"
-  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Output Bitwarden item fields as bash variables
 Usage:
@@ -61,7 +60,7 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-fields`
   eval "$(docopt "$@")"
 
-  checkdeps bw jq # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
+  "$pkgroot/.upkg/.bin/checkdeps" bw jq # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
   # shellcheck disable=2154
   if ! contains_element "$__mechanism" bw cache both; then
     docopt_exit "--mechanism must be \"bw\", \"cache\", or \"both\". Got \"$__mechanism\"."

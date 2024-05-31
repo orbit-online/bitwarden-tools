@@ -5,7 +5,6 @@ bitwarden_cache_items() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
   source "$pkgroot/common.sh"
-  PATH=$("$pkgroot/.upkg/.bin/path_prepend" "$pkgroot/.upkg/.bin")
 
   DOC="Cache Bitwarden multiple items in the socket-credential-cache
 Usage:
@@ -43,7 +42,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-cache-items`
   eval "$(docopt "$@")"
 
-  checkdeps bw
+  "$pkgroot/.upkg/.bin/checkdeps" bw
   local name
   if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
     __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
