@@ -14,7 +14,7 @@ bitwarden_fields() {
 
   DOC="Output Bitwarden item fields as bash variables
 Usage:
-  bitwarden-fields [options] ITEMNAME [FIELD...]
+  bitwarden-fields [options] [-j|-E] ITEMNAME [FIELD...]
 
 Options:
   -p --purpose PURPOSE  Specify why the master password is required.
@@ -24,6 +24,7 @@ Options:
   -m --mechanism=MECH   Use \"bw\" or \"cache\" to retrieve the item [default: both]
   --cache-for=SECONDS   Cache item with socket-credential-cache [default: 0]
   -j --json             Output as JSON instead of bash variables
+  -E --export           Export bash variables (instead of local definitions)
   --prefix=PREFIX       Prefix variable names with supplied string
   -e                    Output exit codes as eval code (e.g. \"(exit 2)\")
   --debug               Turn on bash -x
@@ -36,24 +37,26 @@ Note:
 # shellcheck disable=2016,2086,2317,1090,1091,2034,2154
 docopt() { local v='2.0.1'; source \
 "$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
-%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:933};usage=${DOC:47:55}
-digest=9e0b5;options=('-p --purpose 1' '-m --mechanism 1' ' --cache-for 1' '-j'\
-' --json 0' ' --prefix 1' '-e  0' ' --debug 0');node_0(){ value __purpose 0;}
-node_1(){ value __mechanism 1;};node_2(){ value __cache_for 2;};node_3(){
-switch __json 3;};node_4(){ value __prefix 4;};node_5(){ switch _e 5;};node_6(){
-switch __debug 6;};node_7(){ value ITEMNAME a;};node_8(){ value FIELD a true;}
-node_9(){ optional 0 1 2 3 4 5 6;};node_10(){ optional 11;};node_11(){
-repeatable 8;};node_12(){ sequence 9 7 10;};cat <<<' docopt_exit() { [[ -n $1 \
-]] && printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:47:55}" >&2;exit 1;}';local \
-varnames=(__purpose __mechanism __cache_for __json __prefix _e __debug \
-ITEMNAME FIELD) varname;for varname in "${varnames[@]}"; do unset "var_$varname"
-done;parse 12 "$@";local p=${DOCOPT_PREFIX:-''};for varname in \
-"${varnames[@]}"; do unset "$p$varname";done;if declare -p var_FIELD \
->/dev/null 2>&1; then eval $p'FIELD=("${var_FIELD[@]}")';else eval $p'FIELD=()'
-fi;eval $p'__purpose=${var___purpose:-'"'"'retrieve "$ITEMNAME"'"'"'};'$p'__me'\
-'chanism=${var___mechanism:-both};'$p'__cache_for=${var___cache_for:-0};'$p'__'\
-'json=${var___json:-false};'$p'__prefix=${var___prefix:-};'$p'_e=${var__e:-fal'\
-'se};'$p'__debug=${var___debug:-false};'$p'ITEMNAME=${var_ITEMNAME:-};';local \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:1018};usage=${DOC:47:63}
+digest=1697c;options=('-p --purpose 1' '-m --mechanism 1' ' --cache-for 1' ' -'\
+'-prefix 1' '-e  0' ' --debug 0' '-j --json 0' '-E --export 0');node_0(){
+value __purpose 0;};node_1(){ value __mechanism 1;};node_2(){ value \
+__cache_for 2;};node_3(){ value __prefix 3;};node_4(){ switch _e 4;};node_5(){
+switch __debug 5;};node_6(){ switch __json 6;};node_7(){ switch __export 7;}
+node_8(){ value ITEMNAME a;};node_9(){ value FIELD a true;};node_10(){
+optional 0 1 2 3 4 5;};node_11(){ optional 12;};node_12(){ choice 6 7;}
+node_13(){ optional 14;};node_14(){ repeatable 9;};node_15(){ sequence 10 11 8 \
+13;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf \
+"%s\n" "${DOC:47:63}" >&2;exit 1;}';local varnames=(__purpose __mechanism \
+__cache_for __prefix _e __debug __json __export ITEMNAME FIELD) varname;for \
+varname in "${varnames[@]}"; do unset "var_$varname";done;parse 15 "$@";local \
+p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
+done;if declare -p var_FIELD >/dev/null 2>&1; then eval $p'FIELD=("${var_FIELD'\
+'[@]}")';else eval $p'FIELD=()';fi;eval $p'__purpose=${var___purpose:-'\
+"'"'retrieve "$ITEMNAME"'"'"'};'$p'__mechanism=${var___mechanism:-both};'$p'__'\
+'cache_for=${var___cache_for:-0};'$p'__prefix=${var___prefix:-};'$p'_e=${var__'\
+'e:-false};'$p'__debug=${var___debug:-false};'$p'__json=${var___json:-false};'\
+$p'__export=${var___export:-false};'$p'ITEMNAME=${var_ITEMNAME:-};';local \
 docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
 ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
 "$p$varname";done;done;}
@@ -171,7 +174,12 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
     else
       variable_name=${variable_name//[^A-Za-z0-9_]/_}
       variable_name=${variable_name/#[^A-Za-z_]/_}
-      printf -- 'declare -- %s=%q\n' "$variable_name" "$value"
+      # shellcheck disable=SC2154
+      if $__export; then
+        printf -- 'declare -gx -- %s=%q\n' "$variable_name" "$value"
+      else
+        printf -- 'declare -- %s=%q\n' "$variable_name" "$value"
+      fi
     fi
   done
   if $__json; then
