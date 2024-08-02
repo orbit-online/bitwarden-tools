@@ -37,7 +37,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
     set -x
   fi
 
-  "$pkgroot/.upkg/.bin/checkdeps" bw
+  checkdeps bw
   bw_acquire_lock "unlock"
   local desc="Enter your Bitwarden Master Password"
   # shellcheck disable=2154

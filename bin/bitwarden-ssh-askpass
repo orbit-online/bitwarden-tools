@@ -4,6 +4,7 @@
 bitwarden_ssh_askpass() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  source "$pkgroot/common.sh"
 
   DOC="Retrieve a single field value from Bitwarden and output it verbatim
 Usage:
@@ -53,7 +54,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
   if [[ $__purpose = "retrieve \"\$BW_FIELD\" from \"\$BW_ITEM\"" ]]; then
     __purpose="retrieve \"$__field\" from \"$__item\""
   fi
-  "$pkgroot/bin/bitwarden-value" --purpose "$__purpose" "$__item" "$__field"
+  bitwarden-value --purpose "$__purpose" "$__item" "$__field"
 }
 
 bitwarden_ssh_askpass "$@"

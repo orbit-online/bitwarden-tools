@@ -4,6 +4,7 @@
 bitwarden_aws_keypair() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  source "$pkgroot/common.sh"
 
   DOC="Output AWS credentials stored in Bitwarden
 Usage:
@@ -40,7 +41,7 @@ varname in "${varnames[@]}"; do unset "$p$varname";done;eval $p'__env=${var___'\
     FILE=$HOME/$FILE
   fi
   # shellcheck disable=2154
-  eval "$("$pkgroot/bin/bitwarden-fields" -e --cache-for="$__cache_for" "$ITEMNAME" AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY)"
+  eval "$(bitwarden-fields -e --cache-for="$__cache_for" "$ITEMNAME" AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY)"
   # shellcheck disable=2154
   if $__env; then
     printf 'export AWS_ACCESS_KEY_ID="%s"\nexport AWS_SECRET_ACCESS_KEY="%s"\n' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"

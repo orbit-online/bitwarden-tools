@@ -4,7 +4,7 @@
 k8s_cert() {
   set -eo pipefail; shopt -s inherit_errexit
   local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
-  (cd "$pkgroot" && UPKG_SILENT=true upkg install)
+  source "$pkgroot/common.sh"
 
   DOC="Output client cert credentials for a cluster
 Usage:
@@ -31,7 +31,7 @@ local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-k8s-cert`
   eval "$(docopt "$@")"
   # shellcheck disable=2154
-  eval "$("$pkgroot/bin/bitwarden-fields" -e --cache-for="$__cache_for" "$ITEMNAME" attachment:tls.crt attachment:tls.key)"
+  eval "$(bitwarden-fields -e --cache-for="$__cache_for" "$ITEMNAME" attachment:tls.crt attachment:tls.key)"
   # shellcheck disable=2154
   printf '{
   "apiVersion": "client.authentication.k8s.io/v1beta1",

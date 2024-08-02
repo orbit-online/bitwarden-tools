@@ -42,7 +42,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-cache-items`
   eval "$(docopt "$@")"
 
-  "$pkgroot/.upkg/.bin/checkdeps" bw
+  checkdeps bw
   local name
   if [[ $__purpose = "retrieve the items \"\$ITEMNAME\"..." ]]; then
     __purpose="retrieve \"$(join_by ", " "${ITEMNAME[@]}")\""
@@ -55,7 +55,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
       printf 'bitwarden-cache-items: %d/%d "%s"\n'  "$((progress++))" "${#ITEMNAME[@]}" "$name" >&2
     fi
     # shellcheck disable=2154
-    if ! "$pkgroot/bin/bitwarden-fields" -m cache "$name" >/dev/null 2>&1; then
+    if ! bitwarden-fields -m cache "$name" >/dev/null 2>&1; then
       ! $__check || return 1
       if [[ -z $BW_SESSION ]]; then
         export BW_SESSION
@@ -63,7 +63,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
         BW_SESSION=$(bitwarden-unlock --purpose "$__purpose")
         trap "bw lock >/dev/null" EXIT
       fi
-      "$pkgroot/bin/bitwarden-fields" --cache-for="$__cache_for" "$name" >/dev/null
+      bitwarden-fields --cache-for="$__cache_for" "$name" >/dev/null
     fi
   done
   if ! $__quiet; then
