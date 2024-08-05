@@ -100,7 +100,7 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
         fi
         export BW_SESSION
         if ! BW_SESSION=$(bitwarden-unlock --purpose "$__purpose"); then
-          exit_fatal 2 "Unlocking bitwarden failed"
+          exit_fatal 2 "Unlocking bitwarden failed when trying to get item '%s'" "$ITEMNAME"
         fi
         # shellcheck disable=2064
         trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
@@ -108,16 +108,16 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
       local bw_result bw_result_num
       bw_result=$(bw --nointeraction --raw list items --search "$ITEMNAME" | jq --arg name "$ITEMNAME" '[.[] | select(.name==$name)]')
       if ! bw_result_num=$(jq -e 'length' <<<"$bw_result" 2>/dev/null); then
-        exit_fatal 1 "Unable to parse result from bw"
+        exit_fatal 1 "Unable to parse result from bw for item '%s'" "$ITEMNAME"
       fi
       if (( bw_result_num == 0)); then
-        exit_fatal 3 "'%s' was not found" "$ITEMNAME"
+        exit_fatal 3 "The item '%s' could not be not found" "$ITEMNAME"
       fi
       if (( bw_result_num > 1)); then
         exit_fatal 3 "Got multiple (%d) results when searching for '%s'" "$bw_result_num" "$ITEMNAME"
       fi
       if ! data=$(jq -e '.[0]' <<<"$bw_result" 2>/dev/null); then
-        exit_fatal 1 "Unable to parse result from bw" "$ITEMNAME"
+        exit_fatal 1 "Unable to parse bw result for item %s" "$ITEMNAME"
       fi
       local item_id
       item_id=$(jq -r '.id' <<<"$data")
@@ -153,27 +153,27 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
     # Command substitution removes all trailing newlines, so we append an ETX (end of text) char and then remove it afterwards
     if [[ $field_name = id ]]; then
       if ! value=$(jq -jrce '.id' <<<"$data" && printf '\3'); then
-        exit_fatal 2 "Unable to retrieve the ID field."
+        exit_fatal 2 "Unable to retrieve the ID field of the item '%s'." "$ITEMNAME"
       fi
     elif [[ $field_name = username || $field_name = password || $field_name = totp || $field_name = uris || $field_name = passwordRevisionDate || $field_name = fido2Credentials ]]; then
       if ! value=$(jq -jrce --arg name "$field_name" '.login[$name]' <<<"$data" && printf '\3'); then
-        exit_fatal 4 "The field %s is not set." "$field_name"
+        exit_fatal 4 "The item '%s' does not have a field called '%s'." "$ITEMNAME" "$field_name"
       fi
     elif [[ $field_name = attachmentid:* ]]; then
       local attachment_id=${field_name/#attachmentid:/}
       variable_name=${variable_name/#attachmentid:/}
       if ! value=$(jq -jrce --arg id "$attachment_id" '.attachments[] | select(.id==$id).data' <<<"$data" && printf '\3'); then
-        exit_fatal 4 "The attachment %s does not exist." "$attachment_id"
+        exit_fatal 4 "The item '%s' does not have an attachment with the ID %s." "$ITEMNAME" "$attachment_id"
       fi
     elif [[ $field_name = attachment:* ]]; then
       local attachment_name=${field_name/#attachment:/}
       variable_name=${variable_name/#attachment:/}
       if ! value=$(jq -jrce --arg name "$attachment_name" '.attachments[] | select(.fileName==$name).data' <<<"$data" && printf '\3'); then
-        exit_fatal 4 "The attachment %s does not exist." "$attachment_name"
+        exit_fatal 4 "The item '%s' does not have an attachment called '%s'." "$ITEMNAME" "$attachment_name"
       fi
     else
       if ! value=$(jq -jrce --arg name "$field_name" '.fields[] | select(.name==$name).value' <<<"$data" && printf '\3'); then
-        exit_fatal 4 "The field %s is not set." "$field_name"
+        exit_fatal 4 "The field '%s' on the item '%s' is not set." "$field_name" "$ITEMNAME"
       fi
     fi
     # Remove the ETX char
