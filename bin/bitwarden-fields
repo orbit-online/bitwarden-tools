@@ -105,8 +105,19 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
         # shellcheck disable=2064
         trap "exec 9>&-; BW_SESSION=\"$BW_SESSION\" bw lock >/dev/null" EXIT
       fi
-      if ! data=$(bw --nointeraction --raw get item "$ITEMNAME"); then
-        exit_fatal 3 "Unable to retrieve '%s'" "$ITEMNAME"
+      local bw_result bw_result_num
+      bw_result=$(bw --nointeraction --raw list items --search "$ITEMNAME" | jq --arg name "$ITEMNAME" '[.[] | select(.name==$name)]')
+      if ! bw_result_num=$(jq -e 'length' <<<"$bw_result" 2>/dev/null); then
+        exit_fatal 1 "Unable to parse result from bw"
+      fi
+      if (( bw_result_num == 0)); then
+        exit_fatal 3 "'%s' was not found" "$ITEMNAME"
+      fi
+      if (( bw_result_num > 1)); then
+        exit_fatal 3 "Got multiple (%d) results when searching for '%s'" "$bw_result_num" "$ITEMNAME"
+      fi
+      if ! data=$(jq -e '.[0]' <<<"$bw_result" 2>/dev/null); then
+        exit_fatal 1 "Unable to parse result from bw" "$ITEMNAME"
       fi
       local item_id
       item_id=$(jq -r '.id' <<<"$data")
