@@ -121,13 +121,12 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
       fi
       local item_id
       item_id=$(jq -r '.id' <<<"$data")
-      local attachment_id
-      local attachment_path
+      local attachment_id attachment_path bw_errs
       for attachment_id in $(jq -r '(.attachments // [])[].id' <<<"$data"); do
         attachment_path=$(mktemp)
-        if ! bw --nointeraction get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"; then
+        if ! bw_errs=$(bw --nointeraction get attachment "$attachment_id" --itemid "$item_id" --output "$attachment_path"); then
           rm "$attachment_path"
-          fatal "Failed to retrieve the attachment '%s' from '%s'" "$attachment_id" "$item_id"
+          fatal "%s\nFailed to retrieve the attachment '%s' from '%s'" "$bw_errs" "$attachment_id" "$item_id"
         fi
         data=$(
           jq --arg id "$attachment_id" '.attachments[(.attachments | map(.id == $id) | index(true))].data = '"$(jq --slurp -R . "$attachment_path")" \
