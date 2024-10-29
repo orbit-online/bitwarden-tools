@@ -50,7 +50,7 @@ varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
   bitwarden-fields \
     --mechanism "$__mechanism" --cache-for "$__cache_for" --purpose "$__purpose" --json \
     "$ITEM" "$FIELD" | \
-    jq -re --arg field "$json_field" '.[$field]'
+    jq -jre --arg field "$json_field" '.[$field]'
 }
 
 bitwarden_value "$@"
