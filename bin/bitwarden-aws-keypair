@@ -21,8 +21,8 @@ Notes:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-aws-keypair`
 # shellcheck disable=2016,2086,2317,1090,1091,2034
-docopt() { local v='2.0.1'; source \
-"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+docopt() { local v='2.0.2'; source \
+"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
 %d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:395};usage=${DOC:43:49}
 digest=5bd15;options=('-e --env 0' ' --cache-for 1');node_0(){ switch __env 0;}
 node_1(){ value __cache_for 1;};node_2(){ value ITEMNAME a;};node_3(){
@@ -35,7 +35,7 @@ varname in "${varnames[@]}"; do unset "$p$varname";done;eval $p'__env=${var___'\
 ':-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
 ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
 "$p$varname";done;done;}
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-aws-keypair`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-aws-keypair`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE

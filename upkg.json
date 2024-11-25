@@ -2,8 +2,9 @@
   "name": "bitwarden-tools",
   "dependencies": [
     {
-      "tar": "https://github.com/andsens/docopt.sh/releases/download/v2.0.1/docopt-lib.sh.tar.gz",
-      "sha256": "539053da8b3063921b8889dbe752279e3a215d8fa3e2550d6521e094981f26a2"
+      "name": "docopt-lib-v2.0.2",
+      "tar": "https://github.com/andsens/docopt.sh/releases/download/v2.0.2/docopt-lib.sh.tar.gz",
+      "sha256": "d6997858e7f2470aa602fdd1e443d89b4e2084245b485e4b7924b0f388ec401e"
     },
     {
       "tar": "https://github.com/orbit-online/collections.sh/releases/download/v1.0.0/collections.sh.tar.gz",
@@ -29,11 +30,9 @@
     },
     {
       "name": "github-cli",
-      "bin": [
-        "gh_2.54.0_linux_amd64/bin"
-      ],
-      "tar": "https://github.com/cli/cli/releases/download/v2.54.0/gh_2.54.0_linux_amd64.tar.gz",
-      "sha256": "c4441b2acfb63feb5fc37a346b0a0a66080d657397f1eb81e3025961dcb06dd3"
+      "bin": ["gh_2.59.0_linux_amd64/bin"],
+      "tar": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_linux_amd64.tar.gz",
+      "sha256": "2ce2e480e3c3f7ca0af83418d3ebaeedacee135dbac94bd946d7d84edabcdb64"
     },
     {
       "tar": "https://github.com/orbit-online/records.sh/releases/download/v1.0.2/records.sh.tar.gz",

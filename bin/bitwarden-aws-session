@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# shellcheck source-path=..
+
+main() {
+  set -eo pipefail; shopt -s inherit_errexit
+  local pkgroot; pkgroot=$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")
+  source "$pkgroot/common.sh"
+
+  DOC="Use AWS credentials from Bitwarden to create a time-limited AWS session
+Usage:
+  bitwarden-aws-session [options] ITEMNAME
+
+Options:
+  --env, -e            Output credentials as exported bash vars instead of json
+  --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
+  --duration=SECONDS   Specify the session expiry [default: 3600]
+  --totp               Create an MFA authenticated session
+                       Requires _AWS_ACCOUNT_ID & _AWS_MFA_NAME fields to be set
+  --assume-role=ARN    Assume role ARN and output corresponding credentials.
+                       Use \$_AWS_ROLE_SESSION_NAME to set the session name
+                       (defaults to 'bitwarden-tools')
+
+Notes:
+  Configure in ~/.aws/config with:
+  [profile user]
+  credential_process = bitwarden-aws-session --cache-for=900 aws-api-user
+"
+# docopt parser below, refresh this parser with `docopt.sh bitwarden-aws-session`
+# shellcheck disable=2016,2086,2317,1090,1091,2034
+docopt() { local v='2.0.2'; source \
+"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:837};usage=${DOC:72:49}
+digest=3bab3;options=('-e --env 0' ' --cache-for 1' ' --duration 1' ' --totp 0'\
+ ' --assume-role 1');node_0(){ switch __env 0;};node_1(){ value __cache_for 1;}
+node_2(){ value __duration 2;};node_3(){ switch __totp 3;};node_4(){ value \
+__assume_role 4;};node_5(){ value ITEMNAME a;};node_6(){ optional 0 1 2 3 4;}
+node_7(){ sequence 6 5;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" \
+"$1" >&2;printf "%s\n" "${DOC:72:49}" >&2;exit 1;}';local varnames=(__env \
+__cache_for __duration __totp __assume_role ITEMNAME) varname;for varname in \
+"${varnames[@]}"; do unset "var_$varname";done;parse 7 "$@";local \
+p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
+done;eval $p'__env=${var___env:-false};'$p'__cache_for=${var___cache_for:-0};'\
+$p'__duration=${var___duration:-3600};'$p'__totp=${var___totp:-false};'$p'__as'\
+'sume_role=${var___assume_role:-};'$p'ITEMNAME=${var_ITEMNAME:-};';local \
+docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
+((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
+"$p$varname";done;done;}
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-aws-session`
+  eval "$(docopt "$@")"
+  if [[ $FILE != /* && $FILE != ~* ]]; then
+    FILE=$HOME/$FILE
+  fi
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+  local AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN creds session_creds
+  # shellcheck disable=SC2154
+  creds=$(bitwarden-fields --json --cache-for="$__cache_for" "$ITEMNAME")
+  AWS_ACCESS_KEY_ID=$(jq -re '.AWS_ACCESS_KEY_ID // empty' <<<"$creds") || \
+    fatal 'The item "%s" has no "AWS_ACCESS_KEY_ID" field set' "$ITEMNAME"
+  AWS_SECRET_ACCESS_KEY=$(jq -re '.AWS_SECRET_ACCESS_KEY // empty' <<<"$creds") || \
+    fatal 'The item "%s" has no "AWS_SECRET_ACCESS_KEY" field set' "$ITEMNAME"
+
+  # shellcheck disable=SC2154
+  if $__totp; then
+    local aws_account_id aws_mfa_name
+    aws_account_id=$(jq -re '._AWS_ACCOUNT_ID // empty' <<<"$creds") || \
+      fatal 'The item "%s" has no "_AWS_ACCOUNT_ID" field set (required for --totp)' "$ITEMNAME"
+    aws_mfa_name=$(jq -re '._AWS_MFA_NAME // empty' <<<"$creds") || \
+      fatal 'The item "%s" has no "_AWS_MFA_NAME" field set (required for --totp)' "$ITEMNAME"
+    local \
+      totp_arn=arn:aws:iam::${aws_account_id}:mfa/${aws_mfa_name} \
+      desc="Enter the AWS TOTP code for the MFA device named '${aws_mfa_name}'" \
+      tries=0 errarg=() totp_code
+    while true; do
+      if ((tries >= 3)); then
+        fatal "AWS STS session creation failed"
+      elif totp_code=$("$pkgroot/.upkg/.bin/pinentry-wrapper" --desc "$desc" --ok Authenticate --cancel Abort "${errarg[@]}" 'AWS TOTP code'); then
+        if session_creds=$(export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY;
+          aws sts get-session-token --duration-seconds "$__duration" --serial-number "$totp_arn" --token-code "$totp_code"); then
+          break
+        else
+          errarg=(--error 'Invalid code')
+        fi
+      elif [[ $? -eq 2 ]]; then
+        # Cancelled
+        return 2
+      else
+        fatal "An unknown error occurred"
+      fi
+      ((tries++)) || true
+    done
+  else
+    # shellcheck disable=SC2163
+    session_creds=$(export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; aws sts get-session-token --duration-seconds "$__duration")
+  fi
+  AWS_ACCESS_KEY_ID=$(jq -r .Credentials.AccessKeyId <<<"$session_creds")
+  AWS_SECRET_ACCESS_KEY=$(jq -r .Credentials.SecretAccessKey <<<"$session_creds")
+  AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken <<<"$session_creds")
+  if [[ -n $__assume_role ]]; then
+    session_creds=$(export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN;
+      aws sts assume-role \
+      --duration-seconds "$__duration" \
+      --role-arn "$__assume_role" \
+      --role-session-name "${_AWS_ROLE_SESSION_NAME:-bitwarden-tools}"
+    )
+    AWS_ACCESS_KEY_ID=$(jq -r .Credentials.AccessKeyId <<<"$session_creds")
+    AWS_SECRET_ACCESS_KEY=$(jq -r .Credentials.SecretAccessKey <<<"$session_creds")
+    AWS_SESSION_TOKEN=$(jq -r .Credentials.SessionToken <<<"$session_creds")
+  fi
+
+  # shellcheck disable=2154
+  if $__env; then
+    printf "export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'\n" \
+      "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_SESSION_TOKEN"
+  else
+    jq -n \
+      --arg AWS_ACCESS_KEY_ID "$AWS_ACCESS_KEY_ID" \
+      --arg AWS_SECRET_ACCESS_KEY "$AWS_SECRET_ACCESS_KEY" \
+      --arg AWS_SESSION_TOKEN "$AWS_SESSION_TOKEN" \
+      '{"Version": 1, "AccessKeyId": $AWS_ACCESS_KEY_ID, "SecretAccessKey": $AWS_SECRET_ACCESS_KEY , "SessionToken": $AWS_SESSION_TOKEN}'
+  fi
+}
+
+main "$@"

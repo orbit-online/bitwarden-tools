@@ -27,8 +27,8 @@ Note:
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-ssh-askpass`
 # shellcheck disable=2016,2086,2317,1090,1091,2034,2154
-docopt() { local v='2.0.1'; source \
-"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
+docopt() { local v='2.0.2'; source \
+"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
 %d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:848};usage=${DOC:68:58}
 digest=4b570;options=('-p --purpose 1' ' --item 1' ' --field 1');node_0(){
 value __purpose 0;};node_1(){ value __item 1;};node_2(){ value __field 2;}
@@ -45,7 +45,7 @@ $p'ANYARGS=("${var_ANYARGS[@]}")';else eval $p'ANYARGS=()';fi;eval $p'__purpos'\
 "'"'$BW_FIELD'"'"'};'$p'__=${var___:-false};';local docopt_i=1;[[ \
 $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for \
 varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh/docopt-lib.sh"' bitwarden-ssh-askpass`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-ssh-askpass`
   # shellcheck disable=2034
   DOCOPT_OPTIONS_FIRST=true
   eval "$(docopt "$@")"

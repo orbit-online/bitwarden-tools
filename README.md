@@ -128,5 +128,28 @@ Options:
 Notes:
   Configure in ~/.aws/config with:
   [profile user]
-  credential_process = bitwarden-aws-keypair --cache-for=900 "AWS API user"
+  credential_process = bitwarden-aws-keypair --cache-for=900 aws-api-user
+```
+
+### bitwarden-aws-session
+
+```
+Use AWS credentials from Bitwarden to create a time-limited AWS session
+Usage:
+  bitwarden-aws-session [options] ITEMNAME
+
+Options:
+  --env, -e            Output credentials as exported bash vars instead of json
+  --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
+  --duration=SECONDS   Specify the session expiry [default: 3600]
+  --totp               Create an MFA authenticated session
+                       Requires _AWS_ACCOUNT_ID & _AWS_MFA_NAME fields to be set
+  --assume-role=ARN    Assume role ARN and output corresponding credentials.
+                       Use \$_AWS_ROLE_SESSION_NAME to set the session name
+                       (defaults to 'bitwarden-tools')
+
+Notes:
+  Configure in ~/.aws/config with:
+  [profile user]
+  credential_process = bitwarden-aws-session --cache-for=900 aws-api-user
 ```
