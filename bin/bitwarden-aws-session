@@ -74,11 +74,16 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
       if ((tries >= 3)); then
         fatal "AWS STS session creation failed"
       elif totp_code=$("$pkgroot/.upkg/.bin/pinentry-wrapper" --desc "$desc" --ok Authenticate --cancel Abort "${errarg[@]}" 'AWS TOTP code'); then
-        if session_creds=$(export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY;
-          aws sts get-session-token --duration-seconds "$__duration" --serial-number "$totp_arn" --token-code "$totp_code"); then
-          break
+        if [[ ! $totp_code =~ ^[0-9]{6}$ ]]; then
+          # Protect against sending any passwords over the internet (in case the user thought it was e.g. a bitwarden pw prompt)
+          errarg=(--error 'Not a 6 digit TOTP code')
         else
-          errarg=(--error 'Invalid code')
+          if session_creds=$(export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY;
+            aws sts get-session-token --duration-seconds "$__duration" --serial-number "$totp_arn" --token-code "$totp_code"); then
+            break
+          else
+            errarg=(--error 'Invalid code')
+          fi
         fi
       elif [[ $? -eq 2 ]]; then
         # Cancelled
