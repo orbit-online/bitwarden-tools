@@ -11,7 +11,9 @@ Usage:
   bitwarden-aws-session [options] ITEMNAME
 
 Options:
-  --env, -e            Output credentials as exported bash vars instead of json
+  -e, --env=PREFIX     Output credentials as exported bash vars
+                       prefixed with PREFIX [default: ]
+  -j, --json           Output credentials as AWS CLI compatible JSON
   --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
   --duration=SECONDS   Specify the session expiry [default: 3600]
   --totp               Create an MFA authenticated session
@@ -29,22 +31,23 @@ Notes:
 # shellcheck disable=2016,2086,2317,1090,1091,2034
 docopt() { local v='2.0.2'; source \
 "$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
-%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:837};usage=${DOC:72:49}
-digest=3bab3;options=('-e --env 0' ' --cache-for 1' ' --duration 1' ' --totp 0'\
- ' --assume-role 1');node_0(){ switch __env 0;};node_1(){ value __cache_for 1;}
-node_2(){ value __duration 2;};node_3(){ switch __totp 3;};node_4(){ value \
-__assume_role 4;};node_5(){ value ITEMNAME a;};node_6(){ optional 0 1 2 3 4;}
-node_7(){ sequence 6 5;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" \
-"$1" >&2;printf "%s\n" "${DOC:72:49}" >&2;exit 1;}';local varnames=(__env \
-__cache_for __duration __totp __assume_role ITEMNAME) varname;for varname in \
-"${varnames[@]}"; do unset "var_$varname";done;parse 7 "$@";local \
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:946};usage=${DOC:72:49}
+digest=fc04c;options=('-e --env 1' '-j --json 0' ' --cache-for 1' ' --duration'\
+' 1' ' --totp 0' ' --assume-role 1');node_0(){ value __env 0;};node_1(){
+switch __json 1;};node_2(){ value __cache_for 2;};node_3(){ value __duration 3;}
+node_4(){ switch __totp 4;};node_5(){ value __assume_role 5;};node_6(){ value \
+ITEMNAME a;};node_7(){ optional 0 1 2 3 4 5;};node_8(){ sequence 7 6;};cat \
+<<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
+"${DOC:72:49}" >&2;exit 1;}';local varnames=(__env __json __cache_for \
+__duration __totp __assume_role ITEMNAME) varname;for varname in \
+"${varnames[@]}"; do unset "var_$varname";done;parse 8 "$@";local \
 p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
-done;eval $p'__env=${var___env:-false};'$p'__cache_for=${var___cache_for:-0};'\
-$p'__duration=${var___duration:-3600};'$p'__totp=${var___totp:-false};'$p'__as'\
-'sume_role=${var___assume_role:-};'$p'ITEMNAME=${var_ITEMNAME:-};';local \
-docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
-((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare -p \
-"$p$varname";done;done;}
+done;eval $p'__env=${var___env:-};'$p'__json=${var___json:-false};'$p'__cache_'\
+'for=${var___cache_for:-0};'$p'__duration=${var___duration:-3600};'$p'__totp=$'\
+'{var___totp:-false};'$p'__assume_role=${var___assume_role:-};'$p'ITEMNAME=${v'\
+'ar_ITEMNAME:-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
+for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
+-p "$p$varname";done;done;}
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-aws-session`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
@@ -113,15 +116,15 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
   fi
 
   # shellcheck disable=2154
-  if $__env; then
-    printf "export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'\n" \
-      "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_SESSION_TOKEN"
-  else
+  if $__json; then
     jq -n \
       --arg AWS_ACCESS_KEY_ID "$AWS_ACCESS_KEY_ID" \
       --arg AWS_SECRET_ACCESS_KEY "$AWS_SECRET_ACCESS_KEY" \
       --arg AWS_SESSION_TOKEN "$AWS_SESSION_TOKEN" \
       '{"Version": 1, "AccessKeyId": $AWS_ACCESS_KEY_ID, "SecretAccessKey": $AWS_SECRET_ACCESS_KEY , "SessionToken": $AWS_SESSION_TOKEN}'
+  else
+    printf "export %sAWS_ACCESS_KEY_ID='%s' %sAWS_SECRET_ACCESS_KEY='%s' %sAWS_SESSION_TOKEN='%s'\n" \
+      "$__env" "$AWS_ACCESS_KEY_ID" "$__env" "$AWS_SECRET_ACCESS_KEY" "$__env" "$AWS_SESSION_TOKEN"
   fi
 }
 
