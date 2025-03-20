@@ -56,7 +56,7 @@ for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
   unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
   local \
     AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
-    session_name creds session_creds cache_key session_data
+    session_name creds session_creds cache_key session_data valid_until
   session_name=${_AWS_ROLE_SESSION_NAME:-bitwarden-tools}
   # shellcheck disable=SC2154
   creds=$(bitwarden-fields --json --cache-for="$__cache_for" "$ITEMNAME")
@@ -67,11 +67,19 @@ for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
 
   local cache_key
   # shellcheck disable=SC2154
-  if $__totp; then cache_key="${AWS_ACCESS_KEY_ID}+totp-${session_name}-${__assume_role:-no-role}"
-  else             cache_key="${AWS_ACCESS_KEY_ID}-totp-${session_name}-${__assume_role:-no-role}"; fi
+  if $__totp; then cache_key="AWS-${AWS_ACCESS_KEY_ID}-totp-${session_name}-${__assume_role:-no-role}"
+  else             cache_key="AWS-${AWS_ACCESS_KEY_ID}--${session_name}-${__assume_role:-no-role}"; fi
 
-  if ! session_data=$(socket-credential-cache get "$cache_key" 2>/dev/null); then
+  if session_data=$(socket-credential-cache get "$cache_key" 2>/dev/null); then
+    valid_until=$(jq -r .validUntil <<<"$session_data")
+    if (( valid_until < $(date +%s) )); then
+      session_data=
+      socket-credential-cache clear "$cache_key"
+    fi
+  fi
+  if [[ -z $session_data ]]; then
     # shellcheck disable=SC2154
+    valid_until=$(($(date +%s) + __duration))
     if $__totp; then
       local aws_account_id aws_mfa_name
       aws_account_id=$(jq -re '._AWS_ACCOUNT_ID // empty' <<<"$creds") || \
@@ -127,7 +135,12 @@ for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
         --arg AWS_ACCESS_KEY_ID "$AWS_ACCESS_KEY_ID" \
         --arg AWS_SECRET_ACCESS_KEY "$AWS_SECRET_ACCESS_KEY" \
         --arg AWS_SESSION_TOKEN "$AWS_SESSION_TOKEN" \
-        '{"Version": 1, "AccessKeyId": $AWS_ACCESS_KEY_ID, "SecretAccessKey": $AWS_SECRET_ACCESS_KEY , "SessionToken": $AWS_SESSION_TOKEN}'
+        --argjson validUntil "$valid_until" '{
+          "AWS_ACCESS_KEY_ID": $AWS_ACCESS_KEY_ID,
+          "AWS_SECRET_ACCESS_KEY": $AWS_SECRET_ACCESS_KEY,
+          "AWS_SESSION_TOKEN": $AWS_SESSION_TOKEN,
+          "validUntil": $validUntil
+        }'
     )
     if (( __cache_for > 0 )); then
       local cache_timeout=$__cache_for
@@ -138,13 +151,18 @@ for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
 
   # shellcheck disable=2154
   if $__json; then
-    printf "%s\n" "$session_data"
+    jq '{
+      "Version": 1,
+      "AccessKeyId": .AWS_ACCESS_KEY_ID,
+      "SecretAccessKey": .AWS_SECRET_ACCESS_KEY,
+      "SessionToken": .AWS_SESSION_TOKEN
+    }' <<<"$session_data"
   else
     jq -r --arg env "$__env" '
       "export " +
-      "\($env)AWS_ACCESS_KEY_ID=\(.AccessKeyId | @sh) " +
-      "\($env)AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey | @sh) " +
-      "\($env)AWS_SESSION_TOKEN=\(.SessionToken | @sh)"
+      "\($env)AWS_ACCESS_KEY_ID=\(.AWS_ACCESS_KEY_ID | @sh) " +
+      "\($env)AWS_SECRET_ACCESS_KEY=\(.AWS_SECRET_ACCESS_KEY | @sh) " +
+      "\($env)AWS_SESSION_TOKEN=\(.AWS_SESSION_TOKEN | @sh)"
     ' <<<"$session_data"
   fi
 }
