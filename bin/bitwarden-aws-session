@@ -14,7 +14,8 @@ Options:
   -e, --env=PREFIX     Output credentials as exported bash vars
                        prefixed with PREFIX [default: ]
   -j, --json           Output credentials as AWS CLI compatible JSON
-  --cache-for=SECONDS  Cache item for retrieval without a session [default: 0]
+  --cache-for=SECONDS  Dual purpose: Cache the AWS creds item, but also the
+                       resulting session creds [default: 0]
   --duration=SECONDS   Specify the session expiry [default: 3600]
   --totp               Create an MFA authenticated session
                        Requires _AWS_ACCOUNT_ID & _AWS_MFA_NAME fields to be set
@@ -31,8 +32,8 @@ Notes:
 # shellcheck disable=2016,2086,2317,1090,1091,2034
 docopt() { local v='2.0.2'; source \
 "$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
-%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:946};usage=${DOC:72:49}
-digest=fc04c;options=('-e --env 1' '-j --json 0' ' --cache-for 1' ' --duration'\
+%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:1003};usage=${DOC:72:49}
+digest=df4f9;options=('-e --env 1' '-j --json 0' ' --cache-for 1' ' --duration'\
 ' 1' ' --totp 0' ' --assume-role 1');node_0(){ value __env 0;};node_1(){
 switch __json 1;};node_2(){ value __cache_for 2;};node_3(){ value __duration 3;}
 node_4(){ switch __totp 4;};node_5(){ value __assume_role 5;};node_6(){ value \
