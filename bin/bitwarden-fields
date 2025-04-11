@@ -174,7 +174,7 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
         exit_fatal 4 "The item '%s' does not have an attachment called '%s'." "$ITEMNAME" "$attachment_name"
       fi
     else
-      if ! value=$(jq -jrce --arg name "$field_name" '.fields[] | select(.name==$name).value' <<<"$data" && printf '\3'); then
+      if ! value=$(jq -jrce --arg name "$field_name" '.fields[] | select(.name==$name) | (.value // "")' <<<"$data" && printf '\3'); then
         exit_fatal 4 "The field '%s' on the item '%s' is not set." "$field_name" "$ITEMNAME"
       fi
     fi
