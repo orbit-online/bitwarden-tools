@@ -39,7 +39,8 @@
       "name": "github-cli",
       "bin": ["gh_2.59.0_linux_amd64/bin"],
       "tar": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_linux_amd64.tar.gz",
-      "sha256": "2ce2e480e3c3f7ca0af83418d3ebaeedacee135dbac94bd946d7d84edabcdb64"
+      "sha256": "2ce2e480e3c3f7ca0af83418d3ebaeedacee135dbac94bd946d7d84edabcdb64",
+      "os/arch": "Linux/x86_64"
     },
     {
       "name": "github-cli",
