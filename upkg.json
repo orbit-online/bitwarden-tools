@@ -45,7 +45,7 @@
     {
       "name": "github-cli",
       "bin": ["gh_2.59.0_macOS_arm64/bin"],
-      "tar": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_macOS_arm64.zip",
+      "zip": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_macOS_arm64.zip",
       "sha256": "9dbb2adb97e1afd27b34f008c2b9d20d664096a14a36d72278eb08604be268cb",
       "os/arch": "Darwin/arm64"
     },
