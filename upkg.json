@@ -19,9 +19,16 @@
       "sha256": "78b0826abc0a66ebc9ad55591aa21694e3ad33d1622ab4d16b60f42d78e82750"
     },
     {
+      "name": "jq",
       "file": "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux64",
       "sha256": "5942c9b0934e510ee61eb3e30273f1b3fe2590df93933a93d7c58b81d19c8ff5",
-      "name": "jq"
+      "os/arch": "Linux/x86_64"
+    },
+    {
+      "name": "jq",
+      "file": "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64",
+      "sha256": "0bbe619e663e0de2c550be2fe0d240d076799d6f8a652b70fa04aea8a8362e8a",
+      "os/arch": "Darwin/arm64"
     },
     {
       "bin": [],
@@ -33,6 +40,13 @@
       "bin": ["gh_2.59.0_linux_amd64/bin"],
       "tar": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_linux_amd64.tar.gz",
       "sha256": "2ce2e480e3c3f7ca0af83418d3ebaeedacee135dbac94bd946d7d84edabcdb64"
+    },
+    {
+      "name": "github-cli",
+      "bin": ["gh_2.59.0_macOS_arm64/bin"],
+      "tar": "https://github.com/cli/cli/releases/download/v2.59.0/gh_2.59.0_macOS_arm64.zip",
+      "sha256": "9dbb2adb97e1afd27b34f008c2b9d20d664096a14a36d72278eb08604be268cb",
+      "os/arch": "Darwin/arm64"
     },
     {
       "tar": "https://github.com/orbit-online/records.sh/releases/download/v1.0.2/records.sh.tar.gz",
