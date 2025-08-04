@@ -20,7 +20,7 @@ Options:
   -q --quiet            Don't print progress
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-cache-items`
-# shellcheck disable=2016,2086,2317,1090,1091,2034,2154
+# shellcheck disable=2016,2086,2317,1090,1091,2034,2329,2154
 docopt() { local v='2.0.2'; source \
 "$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
 %d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:590};usage=${DOC:62:52}
