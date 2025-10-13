@@ -19,24 +19,24 @@ Options:
   --cache-for=SECONDS   Cache item with socket-credential-cache [default: 0]
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-value`
-# shellcheck disable=2016,2086,2317,1090,1091,2034,2329
-docopt() { local v='2.0.2'; source \
-"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
-%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:533};usage=${DOC:68:45}
-digest=8f886;options=('-p --purpose 1' '-m --mechanism 1' ' --cache-for 1')
-node_0(){ value __purpose 0;};node_1(){ value __mechanism 1;};node_2(){ value \
-__cache_for 2;};node_3(){ value ITEM a;};node_4(){ value FIELD a;};node_5(){
-optional 0 1 2;};node_6(){ sequence 5 3 4;};cat <<<' docopt_exit() { [[ -n $1 \
-]] && printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:68:45}" >&2;exit 1;}';local \
-varnames=(__purpose __mechanism __cache_for ITEM FIELD) varname;for varname in \
-"${varnames[@]}"; do unset "var_$varname";done;parse 6 "$@";local \
+# shellcheck disable=2016,2086,2329,1090,1091,2034
+docopt() { local v='2.0.3'; source \
+"$pkgroot/.upkg/docopt-lib.sh-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- \
+"exit %d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:533}
+usage=${DOC:68:45};digest=8f886;options=('-p --purpose 1' '-m --mechanism 1' \
+' --cache-for 1');node_0(){ value __purpose 0;};node_1(){ value __mechanism 1;}
+node_2(){ value __cache_for 2;};node_3(){ value ITEM a;};node_4(){ value FIELD a
+};node_5(){ optional 0 1 2;};node_6(){ sequence 5 3 4;};cat <<<' docopt_exit() {
+[[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" "${DOC:68:45}" >&2;exit 1;}'
+local varnames=(__purpose __mechanism __cache_for ITEM FIELD) varname;for \
+varname in "${varnames[@]}"; do unset "var_$varname";done;parse 6 "$@";local \
 p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
 done;eval $p'__purpose=${var___purpose:-'"'"'retrieve FIELD from ITEM'"'"'};'\
 $p'__mechanism=${var___mechanism:-both};'$p'__cache_for=${var___cache_for:-0};'\
 $p'ITEM=${var_ITEM:-};'$p'FIELD=${var_FIELD:-};';local docopt_i=1;[[ \
 $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for ((;docopt_i>0;docopt_i--)); do for \
 varname in "${varnames[@]}"; do declare -p "$p$varname";done;done;}
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-value`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh-v$v/docopt-lib.sh"' bitwarden-value`
   # shellcheck disable=2034
   DOCOPT_OPTIONS_FIRST=true
   eval "$(docopt "$@")"

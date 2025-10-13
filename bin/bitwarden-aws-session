@@ -29,18 +29,18 @@ Notes:
   credential_process = bitwarden-aws-session --cache-for=900 aws-api-user
 "
 # docopt parser below, refresh this parser with `docopt.sh bitwarden-aws-session`
-# shellcheck disable=2016,2086,2317,1090,1091,2034,2329
-docopt() { local v='2.0.2'; source \
-"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- "exit \
-%d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:1003};usage=${DOC:72:49}
-digest=df4f9;options=('-e --env 1' '-j --json 0' ' --cache-for 1' ' --duration'\
-' 1' ' --totp 0' ' --assume-role 1');node_0(){ value __env 0;};node_1(){
-switch __json 1;};node_2(){ value __cache_for 2;};node_3(){ value __duration 3;}
-node_4(){ switch __totp 4;};node_5(){ value __assume_role 5;};node_6(){ value \
-ITEMNAME a;};node_7(){ optional 0 1 2 3 4 5;};node_8(){ sequence 7 6;};cat \
-<<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2;printf "%s\n" \
-"${DOC:72:49}" >&2;exit 1;}';local varnames=(__env __json __cache_for \
-__duration __totp __assume_role ITEMNAME) varname;for varname in \
+# shellcheck disable=2016,2086,2329,1090,1091,2034
+docopt() { local v='2.0.3'; source \
+"$pkgroot/.upkg/docopt-lib.sh-v$v/docopt-lib.sh" "$v" || { ret=$?;printf -- \
+"exit %d\n" "$ret";exit "$ret";};set -e;trimmed_doc=${DOC:0:1003}
+usage=${DOC:72:49};digest=df4f9;options=('-e --env 1' '-j --json 0' ' --cache-'\
+'for 1' ' --duration 1' ' --totp 0' ' --assume-role 1');node_0(){ value __env 0
+};node_1(){ switch __json 1;};node_2(){ value __cache_for 2;};node_3(){ value \
+__duration 3;};node_4(){ switch __totp 4;};node_5(){ value __assume_role 5;}
+node_6(){ value ITEMNAME a;};node_7(){ optional 0 1 2 3 4 5;};node_8(){
+sequence 7 6;};cat <<<' docopt_exit() { [[ -n $1 ]] && printf "%s\n" "$1" >&2
+printf "%s\n" "${DOC:72:49}" >&2;exit 1;}';local varnames=(__env __json \
+__cache_for __duration __totp __assume_role ITEMNAME) varname;for varname in \
 "${varnames[@]}"; do unset "var_$varname";done;parse 8 "$@";local \
 p=${DOCOPT_PREFIX:-''};for varname in "${varnames[@]}"; do unset "$p$varname"
 done;eval $p'__env=${var___env:-};'$p'__json=${var___json:-false};'$p'__cache_'\
@@ -49,7 +49,7 @@ done;eval $p'__env=${var___env:-};'$p'__json=${var___json:-false};'$p'__cache_'\
 'ar_ITEMNAME:-};';local docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2
 for ((;docopt_i>0;docopt_i--)); do for varname in "${varnames[@]}"; do declare \
 -p "$p$varname";done;done;}
-# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib-v$v/docopt-lib.sh"' bitwarden-aws-session`
+# docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh-v$v/docopt-lib.sh"' bitwarden-aws-session`
   eval "$(docopt "$@")"
   if [[ $FILE != /* && $FILE != ~* ]]; then
     FILE=$HOME/$FILE
