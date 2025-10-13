@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOCKDIR="/var/run/lock/bitwarden-tools"
+LOCKDIR="${XDG_RUNTIME_DIR:-/var/run/lock}/bitwarden-tools"
 
 # shellcheck disable=SC1091
 source "${pkgroot:?}/.upkg/records.sh/records.sh"
