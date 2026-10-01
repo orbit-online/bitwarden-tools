@@ -63,7 +63,7 @@ docopt_i=1;[[ $BASH_VERSION =~ ^4.3 ]] && docopt_i=2;for \
 # docopt parser above, complete command for generating this parser is `docopt.sh --library='"$pkgroot/.upkg/docopt-lib.sh-v$v/docopt-lib.sh"' bitwarden-fields`
   eval "$(docopt "$@")"
 
-  checkdeps bw # Keep socket-credential-cachel optional, but let it fail when e.g. --cache-for is used
+  checkdeps bw # Keep socket-credential-cache optional, but let it fail when e.g. --cache-for is used
   # shellcheck disable=2154
   if ! contains_element "$__mechanism" bw cache both; then
     docopt_exit "--mechanism must be \"bw\", \"cache\", or \"both\". Got \"$__mechanism\"."
